@@ -120,12 +120,17 @@ python -m unittest discover -s tests -t .
 We did not use a robot simulator, and we did not copy code from online sources. The environment was
 written for this project with the help of AI coding assistants (see the declaration at the end).
 \begin{itemize}
-  \item \textbf{Gym 0.26.2}: the \code{gym.Env} base class, \code{spaces.Box}, registration
-        (\code{gym.make("BallCatch-v0")}) and the environment checker. Same version as the course's
-        reference environment.
-  \item \textbf{NumPy}: maths and random numbers; any episode can be replayed from its seed.
-  \item \textbf{Matplotlib} for the visualisation; \textbf{Pillow} to save GIFs; Python's \code{heapq}
-        (frame queue) and \code{unittest}.
+  \item \textbf{Gym 0.26.2}: the \code{gym.Env} base class, \code{spaces.Box}, registration and the
+        environment checker. It is the course's reference version, so we follow its API: \code{reset}
+        returns \code{(obs, info)} and \code{step} returns five values. The older Gym 0.23 on our machine
+        expects four, so we set up a clean environment pinned to 0.26.2 (\code{environment.yml}).
+  \item \textbf{NumPy 1.23.5}: maths and random numbers. Gym 0.26.2 does not support NumPy 2, so we pin
+        a 1.x version. All randomness comes from the generator Gym seeds in \code{reset(seed=...)}, so
+        any episode can be replayed exactly.
+  \item \textbf{Matplotlib 3.7.5} for the visualisation, \textbf{Pillow} for GIFs. \code{rgb\_array} mode
+        draws off-screen, so it needs no display. Newer Pillow and pyparsing make this Matplotlib print
+        warnings, so we pin them to 10.4.0 and 3.1.4.
+  \item Python standard library: \code{heapq} for the frame queue, \code{unittest} and \code{argparse}.
 \end{itemize}
 \textbf{Why no physics simulator?} The ball follows a parabola we can compute exactly, and we do not
 simulate contact with the net, so a simulator such as PyBullet would add little. Writing it ourselves
@@ -146,8 +151,7 @@ study. The price was building our own visualisation.
   \item \textbf{Distance-based reward (TA feedback).} The proposal gave $+1$ or $-1$. Now a catch near
         the centre earns more, and a near miss costs less than a large miss. A catch still beats any
         miss by at least 1.
-  \item \textbf{Simplifications.} Circular net opening. Image features come from a pinhole model with
-        pixel noise, not from rendered images. The net always starts in the workspace centre.
+  \item \textbf{Simplifications.} Circular net opening; image features from a noisy pinhole model, not rendered images.
   \item \textbf{Rules we pinned down.} If several frames arrive in one step, only the newest is accepted.
         Throws are built from a chosen flight time and crossing point, so difficulty is easy to control.
 \end{itemize}
@@ -173,16 +177,15 @@ study. The price was building our own visualisation.
 \textbf{Lessons learned.}
 \begin{itemize}
   \item \textbf{Check that delay matters before training.} Hand-written controllers showed this in minutes.
-  \item \textbf{Delay also means lost frames.} With jitter of $80 \pm 40$\,ms, about 36\% of frames are
-        overtaken and discarded, so the controller gets about 19 instead of 30 frames per second.
+  \item \textbf{Delay also means lost frames.} With $80 \pm 40$\,ms jitter, 36\% of frames are overtaken and
+        discarded, leaving about 19 of 30 per second.
   \item \textbf{Reacting is not enough.} The chase policy catches only 19\% even without delay: on high,
         slow throws the line of sight pulls the net up too early. This supports using memory and
         prediction.
 \end{itemize}
 
-\textbf{Next steps.} Re-check the calibration and tune the reward weights once RL policies train;
-implement the predictive baseline (timestamp-aware estimator plus PD control); run several
-environments in parallel for faster training.
+\textbf{Next steps.} Tune the reward weights once RL policies train; implement the predictive baseline
+(estimator plus PD control); run several environments in parallel.
 
 \textbf{AI tool declaration.} We used Claude and GPT, through the AI assistant, to help design, write and
 test the environment code, and optimize the report. The project idea and all the requirements were
