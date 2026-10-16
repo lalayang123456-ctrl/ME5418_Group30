@@ -23,6 +23,15 @@ from ball_catch.config import EnvConfig
 from ball_catch.env import OBS_NET_POS, OBS_NET_VEL, OBS_U, OBS_V, OBS_VALID
 
 
+def oracle_reaction_time(cfg: EnvConfig, delay: float) -> float:
+    """Earliest time (s) at which the interception point could be known from the camera.
+
+    The first frames take `delay` seconds to arrive, and two frames are the minimum needed to
+    estimate a velocity, so a fair privileged oracle waits for the delay plus two camera periods.
+    """
+    return delay + 2.0 * cfg.camera_period
+
+
 def move_to(
     target: np.ndarray,
     pos: np.ndarray,
@@ -103,13 +112,18 @@ class ChaseController(Controller):
         return move_to(target, net_pos, net_vel, cfg)
 
 
-def make_controller(name: str, cfg: EnvConfig, seed: Optional[int] = None) -> Controller:
+def make_controller(
+    name: str, cfg: EnvConfig, seed: Optional[int] = None, delay: float = 0.0
+) -> Controller:
+    """Build a controller by name. `delay` (s) is the typical frame delay of the episode; only the
+    oracle uses it, to wait until the information it is given could have reached a camera-based
+    controller (see `oracle_reaction_time`)."""
     if name == "random":
         return RandomController(seed)
     if name == "stationary":
         return StationaryController()
     if name == "oracle":
-        return OracleController(cfg)
+        return OracleController(cfg, oracle_reaction_time(cfg, delay))
     if name == "chase":
         return ChaseController(cfg)
     raise ValueError(f"unknown controller: {name!r}")

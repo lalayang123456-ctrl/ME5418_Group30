@@ -11,6 +11,7 @@ from ball_catch.delay import (
     JitterDelay,
     SequenceDelay,
     make_delay_model,
+    nominal_delay,
 )
 
 
@@ -95,6 +96,17 @@ class DelayModelTest(unittest.TestCase):
     def test_make_delay_model_passes_instances_through(self):
         model = FixedDelay(0.03)
         self.assertIs(make_delay_model(model, EnvConfig()), model)
+
+    def test_nominal_delay_of_presets_numbers_and_instances(self):
+        cfg = EnvConfig()
+        self.assertEqual(nominal_delay("none", cfg), 0.0)
+        for preset in ("fixed", "jitter", "burst"):
+            self.assertEqual(nominal_delay(preset, cfg), cfg.jitter_mean)
+        self.assertEqual(nominal_delay(0.15, cfg), 0.15)
+        self.assertEqual(nominal_delay(FixedDelay(0.05), cfg), 0.05)
+        self.assertAlmostEqual(nominal_delay(SequenceDelay([0.0, 0.2]), cfg), 0.1)
+        with self.assertRaises(ValueError):
+            nominal_delay("teleport", cfg)
 
     def test_make_delay_model_rejects_unknown_names(self):
         with self.assertRaises(ValueError):
