@@ -39,7 +39,7 @@ Each episode is one throw. A ball flies towards a net that slides in a vertical 
 controls the net's acceleration. The agent knows the net's own state at once, but it sees the ball only
 through camera frames that arrive late, at irregular times, and sometimes out of order.
 The code is a Python package, \code{ball\_catch} (about 1,200 lines), plus a demo, a calibration
-script and 115 unit tests.
+script and 117 unit tests.
 
 \subsection{Organisation}
 
@@ -146,12 +146,13 @@ study. The price was building our own visualisation.
         throw); control 60\,Hz; maximum delay 0.2\,s, which is 17--33\% of the flight.
   \item \textbf{Net limits from a pilot calibration (TA feedback).} Our first guess, 10\,m/s$^2$, was
         too generous: an oracle starting 0.27\,s late still caught 97\% of balls, so delay hardly
-        mattered. With 6\,m/s$^2$ and 3\,m/s, catching is feasible, not trivial, and sensitive to delay
-        when there is little time to recover (Table~\ref{tab:calibration}).
+        mattered. With 6\,m/s$^2$ (the 3\,m/s cap is never reached), catching is feasible, not trivial,
+        and sensitive to delay when there is little time to recover (Table~\ref{tab:calibration}).
   \item \textbf{Distance-based reward (TA feedback).} The proposal gave $+1$ or $-1$. Now a catch near
         the centre earns more, and a near miss costs less than a large miss. A catch still beats any
         miss by at least 1.
-  \item \textbf{Simplifications.} Circular net opening; image features from a noisy pinhole model, not rendered images.
+  \item \textbf{Simplifications.} Circular net; noisy pinhole features, not rendered images; the ball is
+        always in view, so the detection flag stays 1.
   \item \textbf{Rules we pinned down.} If several frames arrive in one step, only the newest is accepted.
         Throws are built from a chosen flight time and crossing point, so difficulty is easy to control.
 \end{itemize}
@@ -184,8 +185,7 @@ study. The price was building our own visualisation.
         prediction.
 \end{itemize}
 
-\textbf{Next steps.} Tune the reward weights once RL policies train; implement the predictive baseline
-(estimator plus PD control); run several environments in parallel.
+\textbf{Next steps.} Train the PPO variants; build the predictive baseline; tune $\lambda$ on held-out seeds; run the stall tests.
 
 \textbf{AI tool declaration.} We used Claude and GPT, through the AI assistant, to help design, write and
 test the environment code, and optimize the report. The project idea and all the requirements were
