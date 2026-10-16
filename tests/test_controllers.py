@@ -10,6 +10,7 @@ from ball_catch.controllers import (
     StationaryController,
     make_controller,
     move_to,
+    oracle_reaction_time,
 )
 from ball_catch.dynamics import BallLaunch, step_net
 from ball_catch.env import OBS_NET_POS, OBS_NET_VEL, OBS_U, OBS_V, OBS_VALID, BallCatchEnv
@@ -96,6 +97,13 @@ class SimpleControllerTest(unittest.TestCase):
         self.assertIsInstance(make_controller("chase", cfg), ChaseController)
         with self.assertRaises(ValueError):
             make_controller("psychic", cfg)
+
+    def test_named_oracle_waits_for_the_delay_plus_two_camera_periods(self):
+        cfg = EnvConfig()
+        self.assertAlmostEqual(make_controller("oracle", cfg).reaction_time, 2.0 / cfg.camera_rate)
+        oracle = make_controller("oracle", cfg, delay=0.15)
+        self.assertAlmostEqual(oracle.reaction_time, 0.15 + 2.0 / cfg.camera_rate)
+        self.assertAlmostEqual(oracle.reaction_time, oracle_reaction_time(cfg, 0.15))
 
 
 class OracleControllerTest(unittest.TestCase):
