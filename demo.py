@@ -7,7 +7,8 @@
     python demo.py --no-render --episodes 200        statistics only
 
 Policies (see ball_catch/controllers.py): random, stationary, chase (uses the observation only),
-oracle (privileged: reads the true interception point).
+oracle (privileged: reads the true interception point, but only starts moving after the typical
+frame delay plus two camera periods).
 Delays: none, fixed, jitter, burst, or a number of seconds.
 """
 
@@ -18,6 +19,7 @@ from PIL import Image
 
 from ball_catch import BallCatchEnv, EnvConfig
 from ball_catch.controllers import make_controller
+from ball_catch.delay import nominal_delay
 from ball_catch.evaluation import run_episode
 
 HOLD_SECONDS = 1.0  # how long the final picture of each episode stays on screen
@@ -67,7 +69,9 @@ def main(argv=None) -> None:
     cfg = EnvConfig(include_timing=not args.no_timing)
     render_mode = None if args.no_render else ("rgb_array" if args.save else "human")
     env = BallCatchEnv(cfg, delay=args.delay, render_mode=render_mode)
-    controller = make_controller(args.policy, cfg, seed=args.seed)
+    # The oracle waits for the typical frame delay plus two camera periods before it moves, as in
+    # calibrate.py; otherwise it would ignore the delay completely.
+    controller = make_controller(args.policy, cfg, seed=args.seed, delay=nominal_delay(args.delay, cfg))
     print(f"policy: {args.policy} | delay: {args.delay} | observation size: {env.observation_space.shape[0]}")
 
     frames = []
