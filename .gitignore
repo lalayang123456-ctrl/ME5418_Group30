@@ -1,3 +1,11 @@
 .venv/
 __pycache__/
 *.pyc
+
+# LaTeX build files
+*.aux
+*.log
+*.fls
+*.fdb_latexmk
+*.out
+*.synctex.gz

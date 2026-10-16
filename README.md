@@ -8,6 +8,10 @@ through camera frames that arrive late, at irregular times and sometimes out of 
 The research question the environment is built for: does telling a recurrent policy *when* each
 frame was captured (capture interval and observation age) help it beyond memory alone?
 
+**Report:** the 2-page report for the OpenAI Gym milestone is
+[`report/OpenAI Gym Code Report.pdf`](report/OpenAI%20Gym%20Code%20Report.pdf); its LaTeX source
+and figure are in the same folder.
+
 ## Setup
 
 ```
@@ -151,6 +155,7 @@ Latency the controller actually experiences under each delay preset:
 | `demo.py` | Demo script |
 | `calibrate.py` | Pilot calibration: feasibility and sensitivity to delay |
 | `tests/` | Unit tests |
+| `report/` | Report for the OpenAI Gym milestone (PDF, LaTeX source, figure) |
 
 ## Using the environment from code
 
