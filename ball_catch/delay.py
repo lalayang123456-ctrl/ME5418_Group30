@@ -128,6 +128,31 @@ def make_delay_model(spec: Union[str, float, DelayModel], cfg: EnvConfig) -> Del
     raise ValueError(f"unknown delay model: {spec!r}")
 
 
+def nominal_delay(spec: Union[str, float, DelayModel], cfg: EnvConfig) -> float:
+    """Typical delivery delay (s) of a delay specification, as accepted by `make_delay_model`.
+
+    Used to give the privileged oracle a fair reaction time. For the random presets it is the
+    jitter mean; a burst's stall is ignored because it does not affect the first frames.
+    """
+    if isinstance(spec, (int, float)):
+        return float(spec)
+    if isinstance(spec, str):
+        if spec == "none":
+            return 0.0
+        if spec in ("fixed", "jitter", "burst"):
+            return cfg.jitter_mean
+        raise ValueError(f"unknown delay model: {spec!r}")
+    if isinstance(spec, FixedDelay):
+        return spec.delay
+    if isinstance(spec, JitterDelay):
+        return spec.mean
+    if isinstance(spec, BurstDelay):
+        return nominal_delay(spec.base, cfg)
+    if isinstance(spec, SequenceDelay):
+        return float(np.mean(spec.delays))
+    raise ValueError(f"no nominal delay for {type(spec).__name__}")
+
+
 # ------------------------------------------------------------------------------ frame delivery
 @dataclass
 class Frame:

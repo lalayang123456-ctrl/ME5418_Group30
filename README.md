@@ -36,7 +36,8 @@ python -m unittest discover -s tests -t .      # unit tests
 ```
 
 `demo.py --help` lists every option. Policies: `random`, `stationary`, `chase` (uses the
-observation only), `oracle` (privileged, reads the true interception point). Delays: `none`,
+observation only), `oracle` (privileged, reads the true interception point, but only starts moving
+after the typical frame delay plus two camera periods, as in the calibration). Delays: `none`,
 `fixed`, `jitter`, `burst`, or a number of seconds.
 
 ### What the window shows

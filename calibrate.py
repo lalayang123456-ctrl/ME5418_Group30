@@ -22,15 +22,16 @@ import argparse
 import numpy as np
 
 from ball_catch import BallCatchEnv, EnvConfig
-from ball_catch.controllers import ChaseController, OracleController, StationaryController
+from ball_catch.controllers import (
+    ChaseController,
+    OracleController,
+    StationaryController,
+    oracle_reaction_time,
+)
 from ball_catch.evaluation import evaluate
 
 DELAYS = [0.0, 0.05, 0.10, 0.15, 0.20]
 SHORT_FLIGHT, LONG_FLIGHT = 0.8, 1.0  # boundaries of the flight-time bins (s)
-
-
-def oracle_reaction_time(cfg: EnvConfig, delay: float) -> float:
-    return delay + 2.0 * cfg.camera_period
 
 
 def rate(results, keep=lambda r: True) -> float:
