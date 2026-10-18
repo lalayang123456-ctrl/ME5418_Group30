@@ -19,7 +19,8 @@ conda env create -f environment.yml
 conda activate ball-catch
 ```
 
-Python 3.9 with `gym 0.26.2`, `numpy`, `matplotlib` and `pillow`. No external simulator is needed.
+Python 3.9 with `gym 0.26.2`, `numpy`, `matplotlib`, `pillow` and `torch 2.5.1` (CPU is enough).
+No external simulator is needed.
 Without conda, create a Python 3.9 virtual environment and `pip install` the packages pinned in
 `environment.yml`.
 
@@ -32,7 +33,8 @@ python demo.py --policy oracle --delay 0.15    # privileged oracle, fixed 150 ms
 python demo.py --save demo.gif --episodes 3    # write an animation instead of opening a window
 python demo.py --no-render --episodes 200      # statistics only
 python calibrate.py                            # pilot calibration tables (add --sweep for net limits)
-python -m unittest discover -s tests -t .      # unit tests
+python -m networks.demo                        # neural networks: forward and backward pass
+python -m unittest                             # all unit tests (environment and networks)
 ```
 
 `demo.py --help` lists every option. Policies: `random`, `stationary`, `chase` (uses the
@@ -141,6 +143,29 @@ Latency the controller actually experiences under each delay preset:
 | jitter (80 ± 40 ms, truncated to 0 - 200 ms) | 88 ms | 210 ms | 53 ms | 36% |
 | burst (jitter plus 4 stalled frames) | 101 ms | 233 ms | 60 ms | 41% |
 
+## Neural networks
+
+`networks/` holds one actor-critic network per PPO variant of the proposal. Each maps observations
+to a Gaussian over the 2-D action and a value estimate.
+
+| Variant | Network | Inputs | Role |
+|---|---|---|---|
+| `single_frame` | MLP: 2 x 64 tanh, separate actor and critic | 9 | Reactive baseline, no memory |
+| `recurrent` | encoder 64 -> GRU 64 -> actor and critic heads | 9 | Memory without capture timestamps |
+| `temporal` | same as `recurrent` | 11 | Memory plus capture interval and observation age |
+
+The two GRU variants differ only in the two timing inputs (128 extra weights). `python -m
+networks.demo` builds each network, plays a short rollout with it (forward pass), then computes the
+PPO loss, backpropagates and prints the gradient reaching each part (backward pass).
+
+```python
+from networks import make_policy, env_config_for
+from ball_catch import BallCatchEnv
+
+policy = make_policy("temporal")
+env = BallCatchEnv(env_config_for("temporal"))   # observation size matches the network
+```
+
 ## Code map
 
 | File | Role |
@@ -157,6 +182,10 @@ Latency the controller actually experiences under each delay preset:
 | `calibrate.py` | Pilot calibration: feasibility and sensitivity to delay |
 | `tests/` | Unit tests |
 | `report/` | Report for the OpenAI Gym milestone (PDF, LaTeX source, figure) |
+| `networks/policies.py` | Actor-critic networks of the three PPO variants (MLP, GRU, GRU with timing) |
+| `networks/ppo.py` | Rollout collection, advantages (GAE) and the clipped PPO loss |
+| `networks/demo.py` | Neural-network demo: forward and backward pass on environment data |
+| `networks/tests/` | Unit tests of the networks |
 
 ## Using the environment from code
 

@@ -12,3 +12,4 @@ dependencies:
       - matplotlib==3.7.5
       - pillow==10.4.0
       - pyparsing==3.1.4
+      - torch==2.5.1
