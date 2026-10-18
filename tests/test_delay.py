@@ -108,6 +108,27 @@ class DelayModelTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             nominal_delay("teleport", cfg)
 
+    def test_invalid_delays_are_rejected(self):
+        cfg = EnvConfig()
+        for bad in (-0.1, float("inf"), float("nan")):
+            with self.assertRaises(ValueError):
+                make_delay_model(bad, cfg)
+            with self.assertRaises(ValueError):
+                nominal_delay(bad, cfg)
+            with self.assertRaises(ValueError):
+                SequenceDelay([0.05, bad])
+        with self.assertRaises(TypeError):
+            FixedDelay(True)
+        with self.assertRaises(ValueError):
+            SequenceDelay([])
+        with self.assertRaises(ValueError):
+            JitterDelay(mean=0.08, std=-0.01, d_max=0.2)
+
+    def test_numpy_numbers_are_accepted_as_fixed_delays(self):
+        model = make_delay_model(np.float32(0.1), EnvConfig())
+        self.assertIsInstance(model, FixedDelay)
+        self.assertAlmostEqual(model.delay, 0.1, places=6)
+
     def test_make_delay_model_rejects_unknown_names(self):
         with self.assertRaises(ValueError):
             make_delay_model("teleport", EnvConfig())

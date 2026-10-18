@@ -6,6 +6,8 @@ only frames that are newer than everything it has already seen and discards the 
 """
 
 import heapq
+import math
+import numbers
 from dataclasses import dataclass
 from typing import List, Optional, Sequence, Union
 
@@ -17,6 +19,16 @@ _TIME_EPS = 1e-9  # tolerance for comparing times that are multiples of the cont
 
 
 # ------------------------------------------------------------------------------ delay models
+def _check_delay(value, name: str = "delay") -> float:
+    """Return `value` as a float, or raise if it is not a finite, non-negative number of seconds."""
+    if isinstance(value, bool) or not isinstance(value, numbers.Real):
+        raise TypeError(f"{name} must be a number of seconds, got {value!r}")
+    value = float(value)
+    if not math.isfinite(value) or value < 0.0:
+        raise ValueError(f"{name} must be finite and >= 0 s, got {value!r}")
+    return value
+
+
 class DelayModel:
     """Draws the delivery delay of each frame of an episode."""
 
@@ -32,7 +44,7 @@ class FixedDelay(DelayModel):
     """Every frame is delayed by the same amount."""
 
     def __init__(self, delay: float):
-        self.delay = float(delay)
+        self.delay = _check_delay(delay)
 
     def sample(self, frame_index, capture_time, rng):
         return self.delay
@@ -42,7 +54,9 @@ class JitterDelay(DelayModel):
     """Independent delays from a Gaussian truncated to [0, d_max]."""
 
     def __init__(self, mean: float, std: float, d_max: float):
-        self.mean, self.std, self.d_max = float(mean), float(std), float(d_max)
+        self.mean = _check_delay(mean, "mean")
+        self.std = _check_delay(std, "std")
+        self.d_max = _check_delay(d_max, "d_max")
 
     def sample(self, frame_index, capture_time, rng):
         # Rejection sampling keeps the Gaussian shape inside the bounds instead of piling
@@ -100,7 +114,9 @@ class SequenceDelay(DelayModel):
     """
 
     def __init__(self, delays: Sequence[float]):
-        self.delays = [float(d) for d in delays]
+        self.delays = [_check_delay(d) for d in delays]
+        if not self.delays:
+            raise ValueError("SequenceDelay needs at least one delay")
 
     def sample(self, frame_index, capture_time, rng):
         return self.delays[frame_index % len(self.delays)]
@@ -114,8 +130,8 @@ def make_delay_model(spec: Union[str, float, DelayModel], cfg: EnvConfig) -> Del
     """
     if isinstance(spec, DelayModel):
         return spec
-    if isinstance(spec, (int, float)):
-        return FixedDelay(spec)
+    if isinstance(spec, numbers.Real) and not isinstance(spec, bool):
+        return FixedDelay(spec)  # checks that the delay is finite and non-negative
     if spec == "none":
         return FixedDelay(0.0)
     if spec == "fixed":
@@ -134,8 +150,8 @@ def nominal_delay(spec: Union[str, float, DelayModel], cfg: EnvConfig) -> float:
     Used to give the privileged oracle a fair reaction time. For the random presets it is the
     jitter mean; a burst's stall is ignored because it does not affect the first frames.
     """
-    if isinstance(spec, (int, float)):
-        return float(spec)
+    if isinstance(spec, numbers.Real) and not isinstance(spec, bool):
+        return _check_delay(spec)
     if isinstance(spec, str):
         if spec == "none":
             return 0.0

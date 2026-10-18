@@ -39,10 +39,13 @@ class EnvConfig:
     net_radius: float = 0.30  # radius of the circular net opening
     workspace_y: Range = (-1.0, 1.0)  # reachable positions of the net centre
     workspace_z: Range = (0.3, 2.0)
-    # Limits chosen in the pilot calibration (calibrate.py --sweep): an oracle still catches every
-    # ball without delay, but loses about 12% of them when its information is 0.2 s late.
+    # Acceleration limit chosen in the pilot calibration (see the README): an oracle still catches
+    # every ball without delay, but loses about 12% of them when its information is 0.2 s late.
     net_a_max: float = 6.0  # per-axis acceleration limit (m/s^2)
-    net_v_max: float = 3.0  # per-axis velocity limit (m/s); rarely reached within one flight
+    # The velocity limit is never reached within a throw: the farthest the net travels along one
+    # axis is 1 m, so its top speed is about sqrt(net_a_max * 1 m) = 2.4 m/s. Acceleration is the
+    # limit that matters; this one only guards against unrealistic speeds.
+    net_v_max: float = 3.0  # per-axis velocity limit (m/s)
 
     # ---------------------------------------------------------------- camera
     camera_position: Tuple[float, float, float] = (2.0, 0.0, 1.15)
