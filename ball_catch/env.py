@@ -140,6 +140,11 @@ class BallCatchEnv(gym.Env):
         return self._observation(), self._info()
 
     def step(self, action):
+        if self.launch is None:
+            raise RuntimeError("call reset() before step()")
+        if self.outcome is not None:
+            # Stepping on would report the final reward a second time.
+            raise RuntimeError("the episode is over; call reset() to start a new throw")
         cfg = self.cfg
         action = np.clip(np.asarray(action, dtype=float).reshape(2), -1.0, 1.0)
         accel = action * cfg.net_a_max

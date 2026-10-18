@@ -153,6 +153,18 @@ class EpisodeTest(unittest.TestCase):
         self.assertAlmostEqual(infos[-1]["time"], 0.905)
         self.assertAlmostEqual(infos[-1]["ball_position"][0], 0.0)
 
+    def test_step_before_reset_is_refused(self):
+        with self.assertRaises(RuntimeError):
+            BallCatchEnv(self.cfg).step(np.zeros(2))
+
+    def test_step_after_the_end_of_a_throw_is_refused_until_reset(self):
+        launch = launch_to(self.cfg, self.centre)
+        run_episode(self.env, seed=0, options={"launch": launch})
+        with self.assertRaises(RuntimeError):
+            self.env.step(np.zeros(2))  # would otherwise pay the terminal reward twice
+        self.env.reset(seed=1)
+        self.env.step(np.zeros(2))  # a new throw can be played
+
     def test_ball_arriving_at_the_net_centre_is_caught_with_full_reward(self):
         launch = launch_to(self.cfg, self.centre)
         _, rewards, infos, _, _ = run_episode(self.env, seed=0, options={"launch": launch})
