@@ -22,7 +22,26 @@ conda activate ball-catch
 Python 3.9 with `gym 0.26.2`, `numpy`, `matplotlib`, `pillow` and `torch 2.5.1` (CPU is enough).
 No external simulator is needed.
 Without conda, create a Python 3.9 virtual environment and `pip install` the packages pinned in
-`environment.yml`.
+`environment.yml`. On Linux, pip installs the CUDA build of PyTorch (about 2 GB); it also runs on a
+CPU-only machine, it is just a larger download.
+
+### Running on Google Colab
+
+Colab ships NumPy 2, which gym 0.26.2 does not support (its environment checker uses the removed
+`np.bool8`). Patching that one line in Colab's copy of gym is enough; PyTorch is pre-installed.
+
+```python
+!git clone https://github.com/lalayang123456-ctrl/ME5418_Group30.git
+%cd ME5418_Group30
+!pip install -q gym==0.26.2
+import gym, os
+!sed -i 's/np\.bool8/np.bool_/g' {os.path.dirname(gym.__file__)}/utils/passive_env_checker.py
+!python -m unittest
+!python -m networks.demo
+```
+
+Colab cannot open the live window: use `demo.py --save demo.gif` and show the file with
+`IPython.display.Image("demo.gif")`, or `--no-render`.
 
 ## Run it
 
@@ -131,8 +150,11 @@ only starts moving after the delay plus two camera periods.
 Catching is feasible (the oracle catches everything without delay), non-trivial (standing still
 catches 5%, reacting without prediction 19%), and the delay matters where there is little time to
 recover: short flights lose over a third of their catches at the maximum delay, long flights none.
-The acceleration limit was chosen with `python calibrate.py --sweep`; with 10 m/s² the oracle still
-caught 97% at the maximum delay, so late information cost almost nothing.
+The acceleration limit was chosen with `python calibrate.py --sweep --episodes 1000`. 6 m/s² is the
+smallest limit at which the oracle catches every ball without delay (5 m/s²: 98.9%), and at the
+maximum delay it still loses 12% of them (88.0%); with 10 m/s² it caught 97%, so late information
+cost almost nothing. At 6 m/s², raising the velocity limit from 3 to 4 m/s changes nothing: the net
+never reaches 3 m/s within a throw, so acceleration is the limit that matters.
 
 Latency the controller actually experiences under each delay preset:
 

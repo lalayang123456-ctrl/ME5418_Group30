@@ -173,6 +173,10 @@ class BallCatchEnv(gym.Env):
             self.time = next_tick
             reward = 0.0
             if self.step_count + 1 >= cfg.max_episode_steps:
+                # Safety net for prescribed launches: with the default flight times (<= 1.2 s) the
+                # ball always crosses the net plane before the 2 s limit, so this never happens in
+                # training. It is reported as truncation (the episode was cut off) but penalised,
+                # because a throw that never arrives is still a failed catch.
                 reward -= cfg.timeout_penalty
                 self.outcome = {
                     "caught": False,
