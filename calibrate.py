@@ -88,7 +88,7 @@ def print_limit_sweep(episodes: int, seed: int) -> None:
     base = EnvConfig()
     print("Oracle success rate for different net limits: no delay -> maximum delay")
     print("  a_max \\ v_max " + "".join(f"{v:>18.1f} m/s" for v in (2.0, 3.0, 4.0)))
-    for a_max in (5.0, 10.0, 15.0, 20.0):
+    for a_max in (5.0, 6.0, 10.0, 15.0, 20.0):  # 6.0 is the chosen default
         cells = []
         for v_max in (2.0, 3.0, 4.0):
             cfg = EnvConfig(net_a_max=a_max, net_v_max=v_max)
