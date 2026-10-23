@@ -37,8 +37,7 @@ class Rollout:
 
 def collect_rollout(env: BallCatchEnv, policy: ActorCritic, steps: int, seed: int = 0) -> Rollout:
     """Run `policy` in `env` for `steps` control steps, resetting after every throw."""
-    obs_list, act_list, logp_list, val_list = [], [], [], []
-    rew_list, done_list, start_list = [], [], []
+    data = {key: [] for key in ("obs", "actions", "log_probs", "values", "rewards", "dones", "episode_start")}
     episodes = catches = 0
 
     obs, _ = env.reset(seed=seed)
@@ -51,13 +50,11 @@ def collect_rollout(env: BallCatchEnv, policy: ActorCritic, steps: int, seed: in
         obs, reward, terminated, truncated, info = env.step(out.action[0].numpy())
         done = terminated or truncated
 
-        obs_list.append(obs_t)
-        act_list.append(out.action)
-        logp_list.append(out.log_prob)
-        val_list.append(out.value)
-        rew_list.append(torch.tensor([reward], dtype=torch.float32))
-        done_list.append(torch.tensor([float(done)]))
-        start_list.append(start)
+        step = dict(obs=obs_t, actions=out.action, log_probs=out.log_prob, values=out.value,
+                    rewards=torch.tensor([reward], dtype=torch.float32),
+                    dones=torch.tensor([float(done)]), episode_start=start)
+        for key, value in step.items():
+            data[key].append(value)
 
         state = out.state
         start = torch.zeros(1)
@@ -70,13 +67,7 @@ def collect_rollout(env: BallCatchEnv, policy: ActorCritic, steps: int, seed: in
     obs_t = torch.as_tensor(obs, dtype=torch.float32).unsqueeze(0)
     last_value = policy.act(obs_t, state, start).value
     return Rollout(
-        obs=torch.stack(obs_list),
-        actions=torch.stack(act_list),
-        log_probs=torch.stack(logp_list),
-        values=torch.stack(val_list),
-        rewards=torch.stack(rew_list),
-        dones=torch.stack(done_list),
-        episode_start=torch.stack(start_list),
+        **{key: torch.stack(values) for key, values in data.items()},  # each [T, 1, ...]
         initial_state=initial_state,
         last_value=last_value,
         episodes=episodes,

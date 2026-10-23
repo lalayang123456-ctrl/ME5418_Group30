@@ -90,7 +90,7 @@ class Renderer:
         radius = cfg.net_radius
 
         # --- side view -----------------------------------------------------------------
-        ax = self.ax_side = fig.add_subplot(grid[0, 0])
+        ax = fig.add_subplot(grid[0, 0])
         self._style(ax, "Side view")
         ax.set_xlim(-cfg.launch_distance_range[1] - 0.6, cam_x + 0.6)
         ax.set_ylim(0.0, 4.0)
@@ -107,7 +107,7 @@ class Renderer:
         (self.side_ball,) = ax.plot([], [], marker="o", ms=9, mfc=BALL, mec=SURFACE, mew=1.5, ls="none")
 
         # --- net plane -----------------------------------------------------------------
-        ax = self.ax_front = fig.add_subplot(grid[0, 1])
+        ax = fig.add_subplot(grid[0, 1])
         self._style(ax, "Net plane, seen from the camera")
         ax.set_xlim(y_lo - 0.6, y_hi + 0.6)
         ax.set_ylim(0.0, z_hi + 0.8)
