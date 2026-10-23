@@ -150,23 +150,16 @@ def nominal_delay(spec: Union[str, float, DelayModel], cfg: EnvConfig) -> float:
     Used to give the privileged oracle a fair reaction time. For the random presets it is the
     jitter mean; a burst's stall is ignored because it does not affect the first frames.
     """
-    if isinstance(spec, numbers.Real) and not isinstance(spec, bool):
-        return _check_delay(spec)
-    if isinstance(spec, str):
-        if spec == "none":
-            return 0.0
-        if spec in ("fixed", "jitter", "burst"):
-            return cfg.jitter_mean
-        raise ValueError(f"unknown delay model: {spec!r}")
-    if isinstance(spec, FixedDelay):
-        return spec.delay
-    if isinstance(spec, JitterDelay):
-        return spec.mean
-    if isinstance(spec, BurstDelay):
-        return nominal_delay(spec.base, cfg)
-    if isinstance(spec, SequenceDelay):
-        return float(np.mean(spec.delays))
-    raise ValueError(f"no nominal delay for {type(spec).__name__}")
+    model = make_delay_model(spec, cfg)  # also rejects unknown names and invalid delays
+    while isinstance(model, BurstDelay):
+        model = model.base
+    if isinstance(model, FixedDelay):
+        return model.delay
+    if isinstance(model, JitterDelay):
+        return model.mean
+    if isinstance(model, SequenceDelay):
+        return float(np.mean(model.delays))
+    raise ValueError(f"no nominal delay for {type(model).__name__}")
 
 
 # ------------------------------------------------------------------------------ frame delivery
