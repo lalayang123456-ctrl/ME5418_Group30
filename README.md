@@ -40,8 +40,15 @@ import gym, os
 !python -m networks.demo
 ```
 
-Colab cannot open the live window: use `demo.py --save demo.gif` and show the file with
-`IPython.display.Image("demo.gif")`, or `--no-render`.
+Colab cannot open the live window. Save an animation and show it instead:
+
+```python
+!python demo.py --save demo.gif
+from IPython.display import Image
+Image("demo.gif")
+```
+
+or print the statistics only: `!python demo.py --no-render`.
 
 ## Run it
 
@@ -51,12 +58,13 @@ python demo.py --policy random --delay burst   # random policy, delay with a sta
 python demo.py --policy oracle --delay 0.15    # privileged oracle, fixed 150 ms delay
 python demo.py --save demo.gif --episodes 3    # write an animation instead of opening a window
 python demo.py --no-render --episodes 200      # statistics only
-python calibrate.py                            # pilot calibration tables (add --sweep for net limits)
+python calibrate.py                            # pilot calibration tables
+python calibrate.py --sweep                    # also sweep the net's acceleration and velocity limits
 python -m networks.demo                        # neural networks: forward and backward pass
 python -m unittest                             # all unit tests (environment and networks)
 ```
 
-`demo.py --help` lists every option. Policies: `random`, `stationary`, `chase` (uses the
+`python demo.py --help` lists every option. Policies: `random`, `stationary`, `chase` (uses the
 observation only), `oracle` (privileged, reads the true interception point, but only starts moving
 after the typical frame delay plus two camera periods, as in the calibration). Delays: `none`,
 `fixed`, `jitter`, `burst`, or a number of seconds.
@@ -176,8 +184,8 @@ to a Gaussian over the 2-D action and a value estimate.
 | `recurrent` | encoder 64 -> GRU 64 -> actor and critic heads | 9 | Memory without capture timestamps |
 | `temporal` | same as `recurrent` | 11 | Memory plus capture interval and observation age |
 
-The two GRU variants differ only in the two timing inputs (128 extra weights). `python -m
-networks.demo` builds each network, plays a short rollout with it (forward pass), then computes the
+The two GRU variants differ only in the two timing inputs (128 extra weights). `python -m networks.demo`
+builds each network, plays a short rollout with it (forward pass), then computes the
 PPO loss, backpropagates and prints the gradient reaching each part (backward pass).
 
 ```python
