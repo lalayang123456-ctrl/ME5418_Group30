@@ -8,9 +8,14 @@ through camera frames that arrive late, at irregular times and sometimes out of 
 The research question the environment is built for: does telling a recurrent policy *when* each
 frame was captured (capture interval and observation age) help it beyond memory alone?
 
-**Report:** the 2-page report for the OpenAI Gym milestone is
-[`report/OpenAI Gym Code Report.pdf`](report/OpenAI%20Gym%20Code%20Report.pdf); its LaTeX source
-and figure are in the same folder.
+**Milestone reports:**
+
+- **OpenAI Gym milestone:** [OpenAI Gym Code Report](report/OpenAI%20Gym%20Code%20Report.pdf)
+  (2 pages), covering the environment, visual delay model and pilot calibration.
+- **Neural Network milestone:** [Neural Network Code Report](report/Neural%20Network%20Code%20Report.pdf)
+  (2 pages), covering the three actor-critic networks, PPO components and forward/backward demo.
+
+The LaTeX sources and supporting figure are in `report/`.
 
 ## Setup
 

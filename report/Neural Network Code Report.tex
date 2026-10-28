@@ -73,8 +73,9 @@ The two recurrent variants differ only in the two timing inputs (128 extra weigh
 in catching can be attributed to timing information rather than to capacity. The \textbf{actor}
 outputs the mean of the Gaussian; its standard deviation is a learned parameter per action axis,
 independent of the observation, initialised to $e^{-0.5} = 0.61$ so that early actions explore most
-of $[-1,1]$. Weights are orthogonally initialised, and the last actor layer has a small gain (0.01),
-so an untrained network starts with mean actions near zero.
+of $[-1,1]$. Linear layers use orthogonal initialisation; the GRU uses PyTorch's default
+initialisation. The last actor layer has a small gain (0.01), so an untrained network starts with
+mean actions near zero.
 
 \subsection{Memory across a throw}
 
