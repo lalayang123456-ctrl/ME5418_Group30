@@ -164,16 +164,6 @@ and auxiliary prediction stay optional extensions. Decisions the proposal left o
         two recurrent policies.
 \end{itemize}
 
-\textbf{Lessons learned.}
-\begin{itemize}
-  \item \textbf{Test the network on the real environment, not only on random tensors.} The demo showed
-        that the network sees no ball for the first five steps of a throw, which random inputs hide.
-  \item \textbf{Recurrent PPO has two code paths.} Acting step by step and re-evaluating a sequence must
-        agree exactly, including memory resets; we test this directly.
-  \item \textbf{Simple sanity checks catch bugs early}: the policy loss is zero before an update,
-        gradients reach every layer, and one optimiser step lowers the loss.
-\end{itemize}
-
 \textbf{Next steps.} Write the training loop (several epochs per rollout, minibatches of whole throws,
 parallel environments); raise $\gamma$ to 0.995--0.999, since the reward comes at the end of a 36--72
 step throw and $0.99^{72} \approx 0.49$; tune the control-cost weight $\lambda$ on held-out seeds;
