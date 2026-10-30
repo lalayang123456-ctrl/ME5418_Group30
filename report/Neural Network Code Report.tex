@@ -144,8 +144,7 @@ python -m unittest                            # all 141 tests
 \end{itemize}
 \textbf{Why not Stable-Baselines3?} Its recurrent PPO (in \code{sb3-contrib}) uses an LSTM with its own
 network layout. Our study needs two recurrent networks that are identical except for two inputs, a
-memory reset exactly at each throw, and the ability to inspect every tensor. Writing the networks
-ourselves (about 470 lines) gives that control and lets us test each piece in isolation.
+memory reset exactly at each throw, and the ability to inspect every tensor. Implementing the networks directly in PyTorch gives that control and lets us test each piece in isolation.
 The environment also runs on Google Colab, which ships NumPy~2: patching one line of Gym's
 environment checker is enough (README).
 
