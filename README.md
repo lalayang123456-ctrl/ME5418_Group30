@@ -14,6 +14,9 @@ frame was captured (capture interval and observation age) help it beyond memory 
   (2 pages), covering the environment, visual delay model and pilot calibration.
 - **Neural Network milestone:** [Neural Network Code Report](report/Neural%20Network%20Code%20Report.pdf)
   (2 pages), covering the three actor-critic networks, PPO components and forward/backward demo.
+- **Learning Agent milestone:** [Learning Agent Code Report](report/Learning%20Agent%20Code%20Report.pdf)
+  (2 pages), covering the PPO training loop, evaluation against the hand-written controllers and
+  first training results.
 
 The LaTeX sources and supporting figure are in `report/`.
 
@@ -43,6 +46,7 @@ import gym, os
 !sed -i 's/np\.bool8/np.bool_/g' {os.path.dirname(gym.__file__)}/utils/passive_env_checker.py
 !python -m unittest
 !python -m networks.demo
+!python train.py --steps 200000
 ```
 
 Colab cannot open the live window. Save an animation and show it instead:
@@ -66,7 +70,10 @@ python demo.py --no-render --episodes 200      # statistics only
 python calibrate.py                            # pilot calibration tables
 python calibrate.py --sweep                    # also sweep the net's acceleration and velocity limits
 python -m networks.demo                        # neural networks: forward and backward pass
-python -m unittest                             # all unit tests (environment and networks)
+python train.py                                # learning agent: train the temporal network with PPO
+python train.py --variant recurrent            # ... or the recurrent / single_frame network
+python demo.py --model runs/temporal_jitter_seed0/model.pt   # watch a trained network
+python -m unittest                             # all unit tests (environment, networks, agent)
 ```
 
 `python demo.py --help` lists every option. Policies: `random`, `stationary`, `chase` (uses the
@@ -201,6 +208,71 @@ policy = make_policy("temporal")
 env = BallCatchEnv(env_config_for("temporal"))   # observation size matches the network
 ```
 
+## Learning agent
+
+`agent/` trains one of the three networks with PPO in the environment; `train.py` is its command
+line. One update:
+
+1. **Collect.** 16 environments run in lockstep for 128 control steps (2048 steps, about 38 throws),
+   with one batched network call per step. A finished throw is reset at once and marked as an episode
+   start, where the GRU clears its memory. Throws and memory carry over to the next rollout.
+2. **Advantages.** GAE, no bootstrapping across the end of a throw.
+3. **Learn.** 10 epochs of 4 minibatches. A minibatch is 4 environments with their whole
+   sequences, and the GRU is re-run from the memory it had at the start of the rollout, exactly as
+   during collection. Adam (learning rate 3e-4, decayed linearly to zero), clipped PPO loss,
+   gradient norm clipped to 0.5.
+4. **Inputs.** The first layer of each network (`ObservationNorm`) standardises the observation with
+   running statistics, updated after the learning phase so that a rollout is collected and
+   re-evaluated with the same statistics.
+
+Every hyperparameter is in `TrainConfig` (`agent/ppo_agent.py`) and is saved with the model.
+
+```
+python train.py                                   # temporal network, jitter delay, 3M steps
+python train.py --variant recurrent --seed 1
+python train.py --steps 50000 --final-episodes 100   # quick check, about a minute
+python train.py --help                            # every option
+```
+
+`train.py` writes `runs/<variant>_<delay>_seed<seed>/`: `model.pt`, `train_log.csv` (one row per
+update) and `training_curve.png`. Every 50 updates the policy is evaluated with its mean action on
+200 held-out throws (seeds from 100000, never used to start a training environment). At the end it
+is compared with the chase and oracle controllers on the same 1000 held-out throws. One million
+steps take about 9 minutes on one CPU core for the recurrent networks and 2 minutes for the MLP.
+
+First results, one training run per network (seed 0, 3M steps, jitter delay), on the same 1000
+held-out throws (`runs/<variant>_jitter_seed0/`):
+
+| Controller | Uses | Caught | Mean return | Mean miss distance |
+|---|---|---|---|---|
+| Stationary | nothing | 5.3% | -0.41 | 0.70 m |
+| Chase (hand-written) | latest frame | 10.5% | -0.27 | 0.55 m |
+| `single_frame` network | latest frame, net state | 14.8% | -0.15 | 0.49 m |
+| `recurrent` network | + memory | 23.7% | +0.04 | 0.41 m |
+| `temporal` network | + memory, capture interval, age | 28.6% | +0.13 | 0.36 m |
+| Oracle (privileged, delayed start) | true crossing point | 97.4% | +1.37 | 0.03 m |
+
+With one run per network, the gap between `recurrent` and `temporal` is not yet evidence that
+timestamps help; several seeds per network come next. Learning curves:
+`python report/plot_learning_curves.py runs/single_frame_jitter_seed0 runs/recurrent_jitter_seed0 runs/temporal_jitter_seed0 --chase 0.105`.
+
+A trained network plays through the same interface as the hand-written controllers
+(`agent.NetworkController`), so `demo.py --model` shows or evaluates it exactly like them:
+
+```
+python demo.py --model runs/temporal_jitter_seed0/model.pt                    # live window
+python demo.py --model runs/temporal_jitter_seed0/model.pt --no-render --episodes 500
+```
+
+```python
+from agent import PPOAgent, TrainConfig, load_policy, NetworkController
+
+agent = PPOAgent(TrainConfig(variant="temporal", total_steps=1_000_000))
+agent.train()
+agent.save("runs/temporal/model.pt")
+print(agent.evaluate(episodes=500)["success_rate"])
+```
+
 ## Code map
 
 | File | Role |
@@ -216,11 +288,16 @@ env = BallCatchEnv(env_config_for("temporal"))   # observation size matches the 
 | `demo.py` | Demo script |
 | `calibrate.py` | Pilot calibration: feasibility and sensitivity to delay |
 | `tests/` | Unit tests |
-| `report/` | Report for the OpenAI Gym milestone (PDF, LaTeX source, figure) |
-| `networks/policies.py` | Actor-critic networks of the three PPO variants (MLP, GRU, GRU with timing) |
-| `networks/ppo.py` | Rollout collection, advantages (GAE) and the clipped PPO loss |
+| `report/` | Milestone reports (PDF, LaTeX source, figures) and the script of the learning-curve figure |
+| `runs/` | The three trained networks of the report: model, training log, learning curve, console output |
+| `networks/policies.py` | Actor-critic networks of the three PPO variants (MLP, GRU, GRU with timing), input standardisation |
+| `networks/ppo.py` | Rollout collection in parallel environments, advantages (GAE) and the clipped PPO loss |
 | `networks/demo.py` | Neural-network demo: forward and backward pass on environment data |
 | `networks/tests/` | Unit tests of the networks |
+| `agent/ppo_agent.py` | `TrainConfig` and `PPOAgent`: the PPO training loop, evaluation, saving and loading |
+| `agent/controller.py` | `NetworkController`: a trained network behind the hand-written controllers' interface |
+| `agent/tests/` | Unit tests of the learning agent |
+| `train.py` | Training script: log, learning curve, checkpoint and held-out comparison |
 
 ## Using the environment from code
 
