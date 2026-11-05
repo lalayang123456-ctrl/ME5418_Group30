@@ -57,10 +57,43 @@ def _head(n_in: int, hidden: int, n_out: int, out_gain: float) -> nn.Sequential:
     return nn.Sequential(_layer(n_in, hidden), nn.Tanh(), _layer(hidden, n_out, out_gain))
 
 
+class ObservationNorm(nn.Module):
+    """Standardises each input with the running mean and variance of the observations seen so far.
+
+    It starts as the identity (mean 0, variance 1) and changes only when `update` is called; the
+    learning agent does that between rollouts, never while a rollout is collected or re-evaluated.
+    The statistics are buffers, not parameters: they are saved with the network but not trained.
+    """
+
+    def __init__(self, size: int, clip: float = 10.0):
+        super().__init__()
+        self.clip = clip
+        self.register_buffer("mean", torch.zeros(size))
+        self.register_buffer("var", torch.ones(size))
+        self.register_buffer("count", torch.tensor(1e-4))  # weight of the initial statistics
+
+    def forward(self, obs: torch.Tensor) -> torch.Tensor:
+        return torch.clamp((obs - self.mean) / torch.sqrt(self.var + 1e-8), -self.clip, self.clip)
+
+    @torch.no_grad()
+    def update(self, obs: torch.Tensor) -> None:
+        """Merge a batch [..., size] into the statistics (parallel formula of Chan et al.)."""
+        batch = obs.reshape(-1, self.mean.numel())
+        n = batch.shape[0]
+        batch_mean, batch_var = batch.mean(0), batch.var(0, unbiased=False)
+        total = self.count + n
+        delta = batch_mean - self.mean
+        m2 = self.var * self.count + batch_var * n + delta ** 2 * self.count * n / total
+        self.mean.add_(delta * n / total)
+        self.var.copy_(m2 / total)
+        self.count.copy_(total)
+
+
 class ActorCritic(nn.Module):
     """Interface shared by all variants.
 
-    Subclasses implement `forward(obs, state, episode_start) -> (action_mean, value, new_state)`.
+    Subclasses implement `forward(obs, state, episode_start) -> (action_mean, value, new_state)`
+    and pass the observation through `obs_norm` first.
     """
 
     recurrent = False
@@ -69,6 +102,7 @@ class ActorCritic(nn.Module):
         super().__init__()
         self.obs_dim = obs_dim
         self.hidden_size = hidden_size
+        self.obs_norm = ObservationNorm(obs_dim)  # identity unless the agent updates it
         # One learned standard deviation per action axis, independent of the observation.
         # exp(-0.5) = 0.61: early exploration covers most of the [-1, 1] action range.
         self.log_std = nn.Parameter(torch.full((ACTION_DIM,), float(init_log_std)))
@@ -134,6 +168,7 @@ class MLPActorCritic(ActorCritic):
 
     def forward(self, obs, state=None, episode_start=None):
         # Each step is processed independently; `state` and `episode_start` are ignored.
+        obs = self.obs_norm(obs)
         return self.actor(obs), self.critic(obs).squeeze(-1), None
 
 
@@ -163,7 +198,7 @@ class RecurrentActorCritic(ActorCritic):
     def forward(self, obs, state=None, episode_start=None):
         steps, batch = obs.shape[:2]
         h = self.initial_state(batch) if state is None else state
-        features = self.encoder(obs)  # [T, B, H], all steps at once
+        features = self.encoder(self.obs_norm(obs))  # [T, B, H], all steps at once
         outputs = []
         for t in range(steps):
             if episode_start is not None:

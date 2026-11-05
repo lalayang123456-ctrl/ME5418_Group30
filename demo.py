@@ -1,14 +1,16 @@
-"""Demo: watch the environment in action under a hand-written policy.
+"""Demo: watch the environment in action under a hand-written policy or a trained network.
 
     python demo.py                                   live window, reactive "chase" policy, jitter
     python demo.py --policy random --delay burst     random policy, delay with a stall
     python demo.py --policy oracle --delay 0.15      privileged oracle, fixed 150 ms delay
     python demo.py --save demo.gif --episodes 3      write an animation instead of opening a window
     python demo.py --no-render --episodes 200        statistics only
+    python demo.py --model runs/temporal_jitter_seed0/model.pt    network trained with train.py
 
 Policies (see ball_catch/controllers.py): random, stationary, chase (uses the observation only),
 oracle (privileged: reads the true interception point, but only starts moving after the typical
-frame delay plus two camera periods).
+frame delay plus two camera periods). `--model` replaces the policy by a trained network, which
+acts with the mean of its action distribution; the network decides whether timing inputs are used.
 Delays: none, fixed, jitter, burst, or a number of seconds.
 """
 
@@ -64,15 +66,27 @@ def main(argv=None) -> None:
     parser.add_argument("--slowmo", type=float, default=3.0, help="slow-motion factor of the saved animation")
     parser.add_argument("--no-render", action="store_true", help="print the results only")
     parser.add_argument("--no-timing", action="store_true", help="use the observation without timing inputs")
+    parser.add_argument("--model", metavar="MODEL.pt", help="trained network from train.py (replaces --policy)")
     args = parser.parse_args(argv)
 
-    cfg = EnvConfig(include_timing=not args.no_timing)
+    if args.model:
+        # Imported here so that the hand-written policies do not need PyTorch.
+        from agent import NetworkController, load_policy
+        from networks.policies import env_config_for
+
+        policy, train_cfg = load_policy(args.model)
+        cfg = env_config_for(train_cfg.variant)  # observation size must match the network
+        controller = NetworkController(policy)
+        name = f"{train_cfg.variant} network ({args.model}, trained with {train_cfg.delay} delay)"
+    else:
+        cfg = EnvConfig(include_timing=not args.no_timing)
+        # The oracle waits for the typical frame delay plus two camera periods before it moves, as
+        # in calibrate.py; otherwise it would ignore the delay completely.
+        controller = make_controller(args.policy, cfg, seed=args.seed, delay=nominal_delay(args.delay, cfg))
+        name = args.policy
     render_mode = None if args.no_render else ("rgb_array" if args.save else "human")
     env = BallCatchEnv(cfg, delay=args.delay, render_mode=render_mode)
-    # The oracle waits for the typical frame delay plus two camera periods before it moves, as in
-    # calibrate.py; otherwise it would ignore the delay completely.
-    controller = make_controller(args.policy, cfg, seed=args.seed, delay=nominal_delay(args.delay, cfg))
-    print(f"policy: {args.policy} | delay: {args.delay} | observation size: {env.observation_space.shape[0]}")
+    print(f"policy: {name} | delay: {args.delay} | observation size: {env.observation_space.shape[0]}")
 
     frames = []
     grab_frame = (lambda e: frames.append(e.render())) if args.save else None

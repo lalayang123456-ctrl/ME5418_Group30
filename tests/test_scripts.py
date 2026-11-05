@@ -46,6 +46,26 @@ class DemoScriptTest(unittest.TestCase):
         self.assertEqual(done.returncode, 0, msg=done.stderr)
 
 
+class TrainScriptTest(unittest.TestCase):
+    def test_trains_saves_and_the_demo_replays_the_network(self):
+        with tempfile.TemporaryDirectory() as folder:
+            done = run_script("train.py", "--variant", "recurrent", "--steps", "256", "--num-envs", "4",
+                              "--rollout-steps", "32", "--eval-every", "1", "--eval-episodes", "2",
+                              "--final-episodes", "3", "--out", folder)
+            self.assertEqual(done.returncode, 0, msg=done.stderr)
+            self.assertIn("Held-out evaluation", done.stdout)
+            for name in ("model.pt", "train_log.csv", "training_curve.png"):
+                self.assertTrue(os.path.exists(os.path.join(folder, name)), name)
+            with open(os.path.join(folder, "train_log.csv"), encoding="utf-8") as log:
+                self.assertEqual(len(log.readlines()), 1 + 2)  # header and two updates
+
+            model = os.path.join(folder, "model.pt")
+            done = run_script("demo.py", "--model", model, "--no-render", "--episodes", "2")
+            self.assertEqual(done.returncode, 0, msg=done.stderr)
+            self.assertIn("recurrent network", done.stdout)
+            self.assertEqual(done.stdout.count("episode "), 2)
+
+
 class CalibrateScriptTest(unittest.TestCase):
     def test_prints_the_feasibility_table(self):
         done = run_script("calibrate.py", "--episodes", "8")

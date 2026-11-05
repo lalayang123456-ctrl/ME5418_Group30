@@ -8,6 +8,7 @@ from networks.policies import (
     TIMED_OBS_DIM,
     VARIANTS,
     MLPActorCritic,
+    ObservationNorm,
     RecurrentActorCritic,
     env_config_for,
     make_policy,
@@ -133,6 +134,33 @@ class GradientTest(unittest.TestCase):
             for name, param in policy.named_parameters():
                 self.assertIsNotNone(param.grad, f"{variant}: {name}")
                 self.assertGreater(float(param.grad.abs().sum()), 0.0, f"{variant}: {name}")
+
+
+class ObservationNormTest(unittest.TestCase):
+    def test_starts_as_the_identity(self):
+        obs = torch.rand(5, 2, TIMED_OBS_DIM) * 4.0
+        torch.testing.assert_close(ObservationNorm(TIMED_OBS_DIM)(obs), obs)
+
+    def test_running_statistics_match_all_data_seen(self):
+        g = torch.Generator().manual_seed(0)
+        first, second = torch.randn(40, 3, 4, generator=g) * 2 + 1, torch.randn(10, 3, 4, generator=g)
+        norm = ObservationNorm(4)
+        norm.update(first)
+        norm.update(second)
+        data = torch.cat([first.reshape(-1, 4), second.reshape(-1, 4)])
+        torch.testing.assert_close(norm.mean, data.mean(0), atol=1e-4, rtol=1e-4)
+        torch.testing.assert_close(norm.var, data.var(0, unbiased=False), atol=1e-4, rtol=1e-4)
+        standardised = norm(data)
+        torch.testing.assert_close(standardised.mean(0), torch.zeros(4), atol=1e-3, rtol=0)
+
+    def test_statistics_are_saved_but_not_trained(self):
+        policy = make_policy("temporal")
+        policy.obs_norm.update(torch.randn(20, 1, TIMED_OBS_DIM) + 3.0)
+        self.assertIn("obs_norm.mean", policy.state_dict())
+        self.assertFalse(any(name.startswith("obs_norm") for name, _ in policy.named_parameters()))
+        copy = make_policy("temporal")
+        copy.load_state_dict(policy.state_dict())
+        torch.testing.assert_close(copy.obs_norm.mean, policy.obs_norm.mean)
 
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@ import torch
 
 from ball_catch.env import BallCatchEnv
 from networks.policies import VARIANTS, env_config_for, make_policy
-from networks.ppo import collect_rollout, compute_gae, gradient_norms, ppo_loss
+from networks.ppo import RolloutCollector, collect_rollout, compute_gae, gradient_norms, ppo_loss
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -70,6 +70,53 @@ class RolloutTest(unittest.TestCase):
             torch.testing.assert_close(value.detach(), rollout.values)
 
 
+class BatchedCollectorTest(unittest.TestCase):
+    """Several environments in lockstep, and throws that continue from one rollout to the next."""
+
+    def setUp(self):
+        torch.manual_seed(0)
+        self.policy = make_policy("temporal")
+        envs = [BallCatchEnv(env_config_for("temporal"), delay="jitter") for _ in range(3)]
+        self.collector = RolloutCollector(envs, self.policy, seed=0)
+
+    def test_shapes_and_bookkeeping_per_environment(self):
+        r = self.collector.collect(100)
+        self.assertEqual(r.obs.shape, (100, 3, 11))
+        self.assertEqual(r.actions.shape, (100, 3, 2))
+        self.assertEqual(r.initial_state.shape, (3, 64))
+        self.assertEqual(r.last_value.shape, (3,))
+        self.assertTrue(torch.all(r.episode_start[0] == 1.0))
+        self.assertEqual(int(r.dones.sum()), r.episodes)
+        self.assertEqual(len(r.episode_returns), r.episodes)
+        # All throws start inside the rollout, so their returns add up to the rewards up to each
+        # environment's last finished throw.
+        total = 0.0
+        for env in range(3):
+            last_end = int(r.dones[:, env].nonzero().max())
+            total += float(r.rewards[: last_end + 1, env].sum())
+        self.assertAlmostEqual(sum(r.episode_returns), total, places=4)
+
+    def test_environments_play_different_throws(self):
+        r = self.collector.collect(10)
+        self.assertFalse(torch.allclose(r.obs[:, 0], r.obs[:, 1]))
+
+    def test_throws_and_memory_continue_into_the_next_rollout(self):
+        first = self.collector.collect(30)
+        second = self.collector.collect(30)
+        torch.testing.assert_close(second.episode_start[0], first.dones[-1])
+        with torch.no_grad():
+            _, _, state = self.policy(first.obs, first.initial_state, first.episode_start)
+        torch.testing.assert_close(second.initial_state, state)
+
+    def test_a_minibatch_of_environments_re_evaluates_exactly(self):
+        r = self.collector.collect(80)
+        part = r.select(torch.tensor([2, 0]))
+        self.assertEqual(part.obs.shape, (80, 2, 11))
+        log_prob, _, value = self.policy.evaluate(part.obs, part.actions, part.initial_state, part.episode_start)
+        torch.testing.assert_close(log_prob.detach(), r.log_probs[:, [2, 0]])
+        torch.testing.assert_close(value.detach(), r.values[:, [2, 0]])
+
+
 class LossTest(unittest.TestCase):
     def setUp(self):
         torch.manual_seed(0)
@@ -83,6 +130,7 @@ class LossTest(unittest.TestCase):
         _, stats = ppo_loss(self.policy, self.rollout, self.adv, self.ret)
         self.assertAlmostEqual(stats["policy_loss"], 0.0, places=5)
         self.assertEqual(stats["clip_fraction"], 0.0)
+        self.assertAlmostEqual(stats["approx_kl"], 0.0, places=6)
 
     def test_backward_reaches_every_part_and_a_step_lowers_the_loss(self):
         optimiser = torch.optim.Adam(self.policy.parameters(), lr=1e-3)
