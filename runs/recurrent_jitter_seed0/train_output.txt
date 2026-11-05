@@ -1,0 +1,43 @@
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+Users of this version of Gym should be able to simply replace 'import gym' with 'import gymnasium as gym' in the vast majority of cases.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+variant recurrent (34,117 parameters) | delay jitter | 1465 updates of 2048 steps | output runs\recurrent_jitter_seed0
+update     steps  catch  return value loss      KL  clip   std held-out
+    50    102400   5.9%  -0.394     0.0254  0.0046  0.05  0.57     9.5%
+   100    204800  12.8%  -0.163     0.0492  0.0076  0.09  0.53    15.0%
+   150    307200  10.3%  -0.212     0.0303  0.0102  0.12  0.48    16.0%
+   200    409600  13.5%  -0.125     0.0444  0.0116  0.14  0.44    18.5%
+   250    512000  23.1%  -0.025     0.0565  0.0146  0.18  0.40    19.5%
+   300    614400  28.9%  +0.105     0.0653  0.0097  0.12  0.37    20.0%
+   350    716800  10.8%  -0.151     0.0371  0.0111  0.12  0.35    21.0%
+   400    819200  20.0%  -0.028     0.0487  0.0125  0.14  0.33    19.5%
+   450    921600  22.2%  -0.011     0.0395  0.0155  0.18  0.31    18.5%
+   500   1024000  21.1%  -0.038     0.0545  0.0179  0.17  0.29    21.0%
+   550   1126400  17.1%  -0.049     0.0489  0.0158  0.17  0.28    20.0%
+   600   1228800  16.7%  -0.051     0.0411  0.0121  0.14  0.26    20.5%
+   650   1331200  27.5%  +0.076     0.0594  0.0125  0.14  0.25    22.5%
+   700   1433600  20.5%  +0.013     0.0511  0.0157  0.18  0.24    23.0%
+   750   1536000  18.9%  +0.010     0.0448  0.0139  0.15  0.23    23.5%
+   800   1638400  15.0%  -0.061     0.0429  0.0122  0.15  0.22    23.0%
+   850   1740800   7.5%  -0.195     0.0368  0.0129  0.15  0.21    22.0%
+   900   1843200  21.2%  +0.022     0.0344  0.0121  0.15  0.21    22.0%
+   950   1945600  23.7%  +0.061     0.0514  0.0120  0.14  0.20    22.5%
+  1000   2048000  16.7%  -0.055     0.0457  0.0139  0.17  0.19    22.5%
+  1050   2150400  16.2%  -0.048     0.0421  0.0123  0.15  0.18    22.0%
+  1100   2252800  23.7%  -0.003     0.0385  0.0094  0.12  0.18    22.0%
+  1150   2355200  20.0%  -0.021     0.0481  0.0119  0.15  0.17    23.0%
+  1200   2457600  23.1%  +0.041     0.0568  0.0095  0.13  0.17    23.0%
+  1250   2560000  19.5%  +0.009     0.0613  0.0083  0.10  0.17    23.5%
+  1300   2662400  24.3%  +0.079     0.0625  0.0075  0.10  0.17    24.0%
+  1350   2764800  15.0%  -0.073     0.0390  0.0056  0.07  0.17    24.5%
+  1400   2867200  11.6%  -0.133     0.0366  0.0047  0.06  0.16    22.5%
+  1450   2969600  13.5%  -0.125     0.0447  0.0017  0.02  0.16    23.0%
+  1465   3000320  26.3%  +0.069     0.0561  0.0000  0.00  0.16    22.5%
+saved runs\recurrent_jitter_seed0\model.pt
+
+Held-out evaluation: 1000 throws (seeds from 100000), delay jitter
+  recurrent network        success  23.7% | mean return +0.043 | mean miss distance 0.406 m
+  chase                    success  10.5% | mean return -0.272 | mean miss distance 0.553 m
+  oracle                   success  97.4% | mean return +1.372 | mean miss distance 0.026 m
+saved runs\recurrent_jitter_seed0\training_curve.png
