@@ -8,45 +8,45 @@ through camera frames that arrive late, at irregular times and sometimes out of 
 The research question the environment is built for: does telling a recurrent policy *when* each
 frame was captured (capture interval and observation age) help it beyond memory alone?
 
-**Milestone reports:**
-
-- **OpenAI Gym milestone:** [OpenAI Gym Code Report](report/OpenAI%20Gym%20Code%20Report.pdf)
-  (2 pages), covering the environment, visual delay model and pilot calibration.
-- **Neural Network milestone:** [Neural Network Code Report](report/Neural%20Network%20Code%20Report.pdf)
-  (2 pages), covering the three actor-critic networks, PPO components and forward/backward demo.
-- **Learning Agent milestone:** [Learning Agent Code Report](report/Learning%20Agent%20Code%20Report.pdf)
-  (2 pages), covering the PPO training loop, evaluation against the hand-written controllers and
-  first training results.
+**Current submission:** [Learning Agent Code Report](report/Learning%20Agent%20Code%20Report.pdf)
+(2 pages), covering the PPO training loop, evaluation against the hand-written controllers,
+external libraries and implementation lessons.
 
 The LaTeX sources and supporting figure are in `report/`.
 
 ## Setup
+
+Run these commands from the project root (the directory containing `environment.yml`).
 
 ```
 conda env create -f environment.yml
 conda activate ball-catch
 ```
 
-Python 3.9 with `gym 0.26.2`, `numpy`, `matplotlib`, `pillow` and `torch 2.5.1` (CPU is enough).
+Python 3.9.25 with `gym 0.26.2`, `numpy`, `matplotlib`, `pillow` and `torch 2.5.1` (CPU is enough).
+`environment.yml` pins the validated Python/pip versions and Python dependencies, including
+transitive dependencies tested on Windows CPU. Linux may additionally install platform-specific CUDA packages.
 No external simulator is needed.
-Without conda, create a Python 3.9 virtual environment and `pip install` the packages pinned in
+Without conda, create a Python 3.9.25 virtual environment and `pip install` the packages pinned in
 `environment.yml`. On Linux, pip installs the CUDA build of PyTorch (about 2 GB); it also runs on a
 CPU-only machine, it is just a larger download.
 
 ### Running on Google Colab
 
-Colab ships NumPy 2, which gym 0.26.2 does not support (its environment checker uses the removed
-`np.bool8`). Patching that one line in Colab's copy of gym is enough; PyTorch is pre-installed.
+The validated environment is the Conda setup above. Colab uses a different, pre-installed package
+stack, so it is a convenience option rather than the pinned reproduction environment. With NumPy 2,
+Gym's checker needs the `np.bool8` reference changed to `np.bool_`.
+Upload and extract the submitted archive into Colab before running the following cells, so that
+the code matches this submission rather than an older GitHub revision:
 
 ```python
-!git clone https://github.com/lalayang123456-ctrl/ME5418_Group30.git
 %cd ME5418_Group30
 !pip install -q gym==0.26.2
 import gym, os
 !sed -i 's/np\.bool8/np.bool_/g' {os.path.dirname(gym.__file__)}/utils/passive_env_checker.py
 !python -m unittest
 !python -m networks.demo
-!python train.py --steps 200000
+!python train.py --steps 200000 --out runs/colab_check
 ```
 
 Colab cannot open the live window. Save an animation and show it instead:
@@ -70,8 +70,8 @@ python demo.py --no-render --episodes 200      # statistics only
 python calibrate.py                            # pilot calibration tables
 python calibrate.py --sweep                    # also sweep the net's acceleration and velocity limits
 python -m networks.demo                        # neural networks: forward and backward pass
-python train.py                                # learning agent: train the temporal network with PPO
-python train.py --variant recurrent            # ... or the recurrent / single_frame network
+python train.py --out runs/new_temporal         # learning agent: train the temporal network with PPO
+python train.py --variant recurrent --out runs/new_recurrent  # or single_frame
 python demo.py --model runs/temporal_jitter_seed0/model.pt   # watch a trained network
 python -m unittest                             # all unit tests (environment, networks, agent)
 ```
@@ -228,33 +228,59 @@ line. One update:
 Every hyperparameter is in `TrainConfig` (`agent/ppo_agent.py`) and is saved with the model.
 
 ```
-python train.py                                   # temporal network, jitter delay, 3M steps
-python train.py --variant recurrent --seed 1
-python train.py --steps 50000 --final-episodes 100   # quick check, about a minute
+python train.py --out runs/new_temporal            # temporal network, jitter delay, 3M steps
+python train.py --variant recurrent --seed 1 --out runs/new_recurrent
+python train.py --steps 50000 --final-episodes 100 --out runs/smoke_test
 python train.py --help                            # every option
 ```
 
 `train.py` writes `runs/<variant>_<delay>_seed<seed>/`: `model.pt`, `train_log.csv` (one row per
-update) and `training_curve.png`. Every 50 updates the policy is evaluated with its mean action on
+update), `training_curve.png` and `evaluation.json` (configuration, evaluation seeds and per-throw results).
+An existing results directory is refused; choose a fresh `--out` directory for another experiment.
+Every 50 updates the policy is evaluated with its mean action on
 200 held-out throws (seeds from 100000, never used to start a training environment). At the end it
 is compared with the chase and oracle controllers on the same 1000 held-out throws. One million
 steps take about 9 minutes on one CPU core for the recurrent networks and 2 minutes for the MLP.
 
-First results, one training run per network (seed 0, 3M steps, jitter delay), on the same 1000
-held-out throws (`runs/<variant>_jitter_seed0/`):
+Repeat the same protocol with independent training seeds (all three variants, 3M steps each):
+
+```
+python run_seeds.py --seeds 1 2 --workers 2
+python report/summarize_seeds.py --seeds 0 1 2
+```
+
+The runner stores each run separately and reuses matching completed runs. Each job uses one CPU
+thread; lower `--workers` on a machine with limited memory. Seeds change network initialisation,
+action sampling and the training throws. Evaluation uses the same 1,000 throws (seeds 100000--100999)
+for every trained policy. Compare means and sample standard deviations across training seeds;
+these describe training variability, not a confidence interval or proof of a timestamp advantage.
+The summary script validates all checkpoint configurations, recreates missing evaluation files for
+legacy runs, and writes per-run CSV, summary JSON and a mean-with-standard-deviation learning curve
+to `report/figures/`. The held-out set is also used for monitoring/tuning; it is not an untouched test set.
+
+Results across three training seeds (0, 1, 2), 3M steps each, jitter delay, on the same 1,000 held-out
+throws. Seed 0 uses the original saved models; seeds 1 and 2 were trained with the unchanged PPO
+settings in the pinned environment. Values are mean ± sample standard deviation across training seeds:
 
 | Controller | Uses | Caught | Mean return | Mean miss distance |
 |---|---|---|---|---|
 | Stationary | nothing | 5.3% | -0.41 | 0.70 m |
 | Chase (hand-written) | latest frame | 10.5% | -0.27 | 0.55 m |
-| `single_frame` network | latest frame, net state | 14.8% | -0.15 | 0.49 m |
-| `recurrent` network | + memory | 23.7% | +0.04 | 0.41 m |
-| `temporal` network | + memory, capture interval, age | 28.6% | +0.13 | 0.36 m |
+| `single_frame` network | latest frame, net state | 13.4% ± 1.2 pp | -0.18 ± 0.03 | 0.51 ± 0.02 m |
+| `recurrent` network | + memory | 22.6% ± 3.0 pp | 0.00 ± 0.08 | 0.43 ± 0.05 m |
+| `temporal` network | + memory, capture interval, age | 28.0% ± 3.2 pp | +0.11 ± 0.05 | 0.37 ± 0.02 m |
 | Oracle (privileged, delayed start) | true crossing point | 97.4% | +1.37 | 0.03 m |
 
-With one run per network, the gap between `recurrent` and `temporal` is not yet evidence that
-timestamps help; several seeds per network come next. Learning curves:
-`python report/plot_learning_curves.py runs/single_frame_jitter_seed0 runs/recurrent_jitter_seed0 runs/temporal_jitter_seed0 --chase 0.105`.
+The temporal network exceeds the recurrent network by 4.9, 5.8 and 5.3 percentage points in seeds
+0, 1 and 2, respectively (mean gap 5.3 points). This is preliminary evidence on the current benchmark;
+three seeds and an evaluation set also used for monitoring/tuning do not establish general superiority.
+The final checkpoint is used for every run, rather than the best intermediate validation score.
+
+Per-run success rates (seeds 0 / 1 / 2): `single_frame` 14.8% / 12.6% / 12.7%;
+`recurrent` 23.7% / 25.0% / 19.2%; `temporal` 28.6% / 30.8% / 24.5%.
+The exact metrics are in [`multiseed_results.csv`](report/figures/multiseed_results.csv) and
+[`multiseed_summary.json`](report/figures/multiseed_summary.json).
+Regenerate the mean-and-SD figure with `python report/summarize_seeds.py --seeds 0 1 2`.
 
 A trained network plays through the same interface as the hand-written controllers
 (`agent.NetworkController`), so `demo.py --model` shows or evaluates it exactly like them:
@@ -289,7 +315,7 @@ print(agent.evaluate(episodes=500)["success_rate"])
 | `calibrate.py` | Pilot calibration: feasibility and sensitivity to delay |
 | `tests/` | Unit tests |
 | `report/` | Milestone reports (PDF, LaTeX source, figures) and the script of the learning-curve figure |
-| `runs/` | The three trained networks of the report: model, training log, learning curve, console output |
+| `runs/` | Nine trained models (three variants × three seeds), logs, curves, console output and evaluation results |
 | `networks/policies.py` | Actor-critic networks of the three PPO variants (MLP, GRU, GRU with timing), input standardisation |
 | `networks/ppo.py` | Rollout collection in parallel environments, advantages (GAE) and the clipped PPO loss |
 | `networks/demo.py` | Neural-network demo: forward and backward pass on environment data |
@@ -298,6 +324,8 @@ print(agent.evaluate(episodes=500)["success_rate"])
 | `agent/controller.py` | `NetworkController`: a trained network behind the hand-written controllers' interface |
 | `agent/tests/` | Unit tests of the learning agent |
 | `train.py` | Training script: log, learning curve, checkpoint and held-out comparison |
+| `run_seeds.py` | Repeat the same training protocol with independent seeds and separate output folders |
+| `report/summarize_seeds.py` | Validate completed runs, aggregate training-seed variability and plot the comparison |
 
 ## Using the environment from code
 
