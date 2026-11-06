@@ -182,7 +182,8 @@ return early on ($-0.22$ against $-0.57$ after 0.1\,M steps); the runs were leve
 
 \textbf{Next steps.} More seeds per network before comparing them; evaluation across fixed delays of
 0--0.2\,s and on unseen burst delays; the predictive estimator with a PD controller as physics-based
-baseline; and a check of action saturation (mean actions beyond $\pm1$), where tanh squashing is the fallback.
+baseline; tuning of the control-cost weight $\lambda$ on held-out seeds;
+and a check of action saturation (mean actions beyond $\pm1$), where tanh squashing is the fallback.
 
 \textbf{AI tool declaration.} We used Claude and GPT, through the AI assistant, to help design, write and
 test the agent code, and to draft and optimise this report. The requirements for the project were proposed by us after
