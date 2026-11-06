@@ -1,0 +1,170 @@
+{
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "eval_seed": 100000,
+  "eval_episodes": 1000,
+  "training_protocol": {
+    "delay": "jitter",
+    "total_steps": 3000000,
+    "num_envs": 16,
+    "rollout_steps": 128,
+    "epochs": 10,
+    "minibatches": 4,
+    "lr": 0.0003,
+    "anneal_lr": true,
+    "gamma": 0.995,
+    "lam": 0.95,
+    "clip": 0.2,
+    "value_coef": 0.5,
+    "entropy_coef": 0.0,
+    "max_grad_norm": 0.5,
+    "hidden_size": 64,
+    "normalize_obs": true
+  },
+  "per_run": [
+    {
+      "variant": "single_frame",
+      "seed": 0,
+      "steps": 3000320,
+      "success_rate": 0.148,
+      "mean_return": -0.14863403411439094,
+      "mean_miss_distance": 0.4932250991540866
+    },
+    {
+      "variant": "single_frame",
+      "seed": 1,
+      "steps": 3000320,
+      "success_rate": 0.126,
+      "mean_return": -0.21799535840676554,
+      "mean_miss_distance": 0.5370957418682821
+    },
+    {
+      "variant": "single_frame",
+      "seed": 2,
+      "steps": 3000320,
+      "success_rate": 0.127,
+      "mean_return": -0.1834164049743072,
+      "mean_miss_distance": 0.5100689345682093
+    },
+    {
+      "variant": "recurrent",
+      "seed": 0,
+      "steps": 3000320,
+      "success_rate": 0.237,
+      "mean_return": 0.04313363469560265,
+      "mean_miss_distance": 0.40612726590826603
+    },
+    {
+      "variant": "recurrent",
+      "seed": 1,
+      "steps": 3000320,
+      "success_rate": 0.25,
+      "mean_return": 0.05674147493241512,
+      "mean_miss_distance": 0.3917397183252174
+    },
+    {
+      "variant": "recurrent",
+      "seed": 2,
+      "steps": 3000320,
+      "success_rate": 0.192,
+      "mean_return": -0.0961350569679037,
+      "mean_miss_distance": 0.4810874987877165
+    },
+    {
+      "variant": "temporal",
+      "seed": 0,
+      "steps": 3000320,
+      "success_rate": 0.286,
+      "mean_return": 0.13348609403379474,
+      "mean_miss_distance": 0.3632630456031346
+    },
+    {
+      "variant": "temporal",
+      "seed": 1,
+      "steps": 3000320,
+      "success_rate": 0.308,
+      "mean_return": 0.15263583341667766,
+      "mean_miss_distance": 0.3676511582772729
+    },
+    {
+      "variant": "temporal",
+      "seed": 2,
+      "steps": 3000320,
+      "success_rate": 0.245,
+      "mean_return": 0.055652946428146326,
+      "mean_miss_distance": 0.3929905552198302
+    }
+  ],
+  "summary": {
+    "single_frame": {
+      "success_rate": {
+        "mean": 0.13366666666666666,
+        "sample_sd": 0.012423096769056143
+      },
+      "mean_return": {
+        "mean": -0.18334859916515456,
+        "sample_sd": 0.03468071186003547
+      },
+      "mean_miss_distance": {
+        "mean": 0.5134632585301927,
+        "sample_sd": 0.022131412051839813
+      }
+    },
+    "recurrent": {
+      "success_rate": {
+        "mean": 0.22633333333333333,
+        "sample_sd": 0.030435724623102584
+      },
+      "mean_return": {
+        "mean": 0.0012466842200380228,
+        "sample_sd": 0.08460907732964651
+      },
+      "mean_miss_distance": {
+        "mean": 0.42631816100706665,
+        "sample_sd": 0.04797406228434081
+      }
+    },
+    "temporal": {
+      "success_rate": {
+        "mean": 0.2796666666666667,
+        "sample_sd": 0.0319739477283199
+      },
+      "mean_return": {
+        "mean": 0.11392495795953958,
+        "sample_sd": 0.05136534459676296
+      },
+      "mean_miss_distance": {
+        "mean": 0.3746349197000792,
+        "sample_sd": 0.016047146154712064
+      }
+    }
+  },
+  "baselines": {
+    "stationary": {
+      "success_rate": 0.053,
+      "mean_return": -0.4141535619947384,
+      "mean_miss_distance": 0.7020454448295916
+    },
+    "chase": {
+      "success_rate": 0.105,
+      "mean_return": -0.2722386766132932,
+      "mean_miss_distance": 0.5529633654938491
+    },
+    "oracle": {
+      "success_rate": 0.974,
+      "mean_return": 1.371881341042499,
+      "mean_miss_distance": 0.026179756640242965
+    }
+  },
+  "temporal_minus_recurrent": [
+    0.04899999999999999,
+    0.057999999999999996,
+    0.05299999999999999
+  ],
+  "monitor_eval_episodes": 200,
+  "monitor_chase_success_rate": 0.09,
+  "note": "Sample SD measures training-seed variability, not a confidence interval. The fixed held-out set was also used for monitoring and tuning."
+}
