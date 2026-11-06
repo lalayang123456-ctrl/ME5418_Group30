@@ -40,7 +40,7 @@ The learning agent connects the two previous milestones: it plays a network from
 in the Gym environment of \code{ball\_catch/} and trains it with PPO. The new code is a package
 \code{agent/}, a training script \code{train.py}, a parallel rollout collector added to
 \code{networks/ppo.py}, an input-standardisation layer in the networks and a \code{-{}-model} option
-for \code{demo.py}: about 600 lines of code and 21 new unit tests (162 in the repository).
+for \code{demo.py}: about 600 lines of code and 21 new unit tests.
 
 \subsection{Organisation}
 
@@ -50,7 +50,7 @@ for \code{demo.py}: about 600 lines of code and 21 new unit tests (162 in the re
   \midrule
   \code{agent/ppo\_agent.py}  & \code{TrainConfig} (every hyperparameter, saved with the model) and \code{PPOAgent}:
                                  \code{update}, \code{train}, \code{evaluate}, \code{save}; \code{load\_policy}. \\
-  \code{agent/controller.py} & \code{NetworkController}: a trained network behind the interface of the hand-written
+  \code{agent/controller.py} & \code{NetworkController}: a trained network behind the interface of the
                                  controllers, so that it is evaluated and displayed by the same code. \\
   \code{networks/ppo.py}     & New \code{RolloutCollector} (several environments, one batched network call per step)
                                  and \code{Rollout.select} (a minibatch of environments). \\
@@ -96,7 +96,7 @@ collected and re-evaluated with the same statistics, and it is saved with the we
 100{,}000, while training environments start from seeds 0--15. Throws, sensor noise and delays depend only
 on the seed, so the controllers of the first milestone face exactly the same episodes.
 Each network was trained once (seed 0) for 3\,M steps under jittered delay, about 30 minutes per recurrent
-network on one CPU core. All three now catch more balls than the hand-written chase controller, and the
+network on one CPU core. All three now catch more balls than the chase controller, and the
 two recurrent networks clearly more than the single-frame one (Fig.~\ref{fig:curves}, Table~\ref{tab:results}).
 The single-frame network stopped improving after about 1.5\,M steps. The temporal network learned more
 slowly than the recurrent one during the first 1.3\,M steps, then overtook it. With one training
@@ -122,7 +122,7 @@ yet predict the crossing point accurately; the delayed oracle still catches 97\%
     Controller & Uses & Caught & Mean return & Mean miss distance \\
     \midrule
     Stationary                       & nothing                          &  5.3\% & $-0.41$ & 0.70\,m \\
-    Chase (hand-written)             & latest frame                     & 10.5\% & $-0.27$ & 0.55\,m \\
+    Chase                           & latest frame                     & 10.5\% & $-0.27$ & 0.55\,m \\
     \code{single\_frame} network     & latest frame, net state          & 14.8\% & $-0.15$ & 0.49\,m \\
     \code{recurrent} network         & + memory                         & 23.7\% & $+0.04$ & 0.41\,m \\
     \code{temporal} network          & + memory, capture interval, age  & 28.6\% & $+0.13$ & 0.36\,m \\
@@ -155,7 +155,7 @@ python -m unittest                       # all 162 tests
         update follows the CleanRL single-file implementations: Adam with $\epsilon = 10^{-5}$,
         gradient clipping, linear learning-rate decay and the KL estimate $\mathbb{E}[(r-1)-\log r]$
         from \code{ppo\_continuous\_action.py}; minibatches of whole environment sequences with their
-        initial memory from \code{ppo\_atari\_lstm.py}. We wrote our own code from these descriptions.
+        initial memory from \code{ppo\_atari\_lstm.py}.
 \end{itemize}
 
 %==========================================================================================
