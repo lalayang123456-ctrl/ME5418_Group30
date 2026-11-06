@@ -1,10 +1,11 @@
 """Figure of the Learning Agent report: held-out catch rate of the three variants during training.
 
     python report/plot_learning_curves.py runs/single_frame_jitter_seed0 runs/recurrent_jitter_seed0 \
-        runs/temporal_jitter_seed0 --chase 0.105
+        runs/temporal_jitter_seed0 --chase 0.09
 
-Each folder is the output of train.py; the chase and oracle rates are the ones train.py prints at
-the end (same held-out throws), drawn as reference lines.
+Each folder is the output of train.py. Reference rates must use the same throws as its intermediate
+evaluations: with the default 200 throws (seeds 100000--100199), chase catches 9.0% and oracle 97.0%.
+The 1000-throw final rates (10.5% and 97.4%) belong in the final-results table instead.
 """
 
 import argparse
@@ -56,7 +57,7 @@ def main(argv=None) -> None:
         ax.xaxis.label.set_size(8)
         ax.yaxis.label.set_size(8)
     fig.tight_layout(pad=0.3)
-    os.makedirs(os.path.dirname(args.out), exist_ok=True)
+    os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
     fig.savefig(args.out)
     print(f"saved {args.out}")
 

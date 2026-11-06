@@ -1,14 +1,15 @@
 """Train the learning agent: PPO on one of the three networks, in the ball-catching environment.
 
-    python train.py                                        temporal variant, jitter delay, 3M steps
-    python train.py --variant recurrent                    memory without capture timestamps
-    python train.py --variant single_frame                 reactive baseline (no memory)
-    python train.py --steps 20000 --eval-every 0 --final-episodes 50   quick check that it all runs
+    python train.py --out runs/new_temporal                temporal variant, jitter delay, 3M steps
+    python train.py --variant recurrent --out runs/new_recurrent    memory without timestamps
+    python train.py --variant single_frame --out runs/new_mlp       reactive baseline
+    python train.py --steps 20000 --final-episodes 50 --out runs/smoke_test   quick check
 
 Writes to runs/<variant>_<delay>_seed<seed>/ (or --out):
     model.pt             network weights and training configuration (python demo.py --model ...)
     train_log.csv        one row per update: catch rate, return, losses, KL, held-out evaluations
     training_curve.png   catch rate and return over training
+    evaluation.json      configuration, evaluation protocol and per-throw outcomes
 
 Every --eval-every updates the deterministic policy (mean action) is evaluated on held-out throws.
 At the end it is compared with the hand-written chase and oracle controllers on the same throws.
@@ -17,7 +18,9 @@ At the end it is compared with the hand-written chase and oracle controllers on 
 
 import argparse
 import csv
+import json
 import os
+from dataclasses import asdict
 
 import torch
 
@@ -116,6 +119,10 @@ def main(argv=None) -> None:
     parser.add_argument("--log-every", type=int, default=10, help="updates between printed lines")
     parser.add_argument("--out", help="output folder (default runs/<variant>_<delay>_seed<seed>)")
     args = parser.parse_args(argv)
+    if args.steps <= 0 or args.epochs <= 0 or args.log_every <= 0:
+        parser.error("steps, epochs and log-every must be positive")
+    if args.final_episodes <= 0 or args.eval_episodes <= 0 or args.eval_every < 0:
+        parser.error("episode counts must be positive and eval-every must be nonnegative")
 
     # The networks are small: one thread is faster than PyTorch's default multi-threading here.
     torch.set_num_threads(1)
@@ -126,6 +133,10 @@ def main(argv=None) -> None:
     )
     out = args.out or os.path.join("runs", f"{args.variant}_{args.delay}_seed{args.seed}")
     os.makedirs(out, exist_ok=True)
+    # A quick check must not silently destroy the models used in the report.
+    artifacts = ("model.pt", "train_log.csv", "training_curve.png", "evaluation.json")
+    if any(os.path.exists(os.path.join(out, name)) for name in artifacts):
+        parser.error(f"output folder already contains results: {out}; choose a new --out folder")
     model_path = os.path.join(out, "model.pt")
 
     agent = PPOAgent(config)
@@ -162,13 +173,19 @@ def main(argv=None) -> None:
     print(f"\nHeld-out evaluation: {args.final_episodes} throws (seeds from {EVAL_SEED}), delay {config.delay}")
     env_cfg = env_config_for(config.variant)
     results = {f"{config.variant} network": agent.evaluate(args.final_episodes)}
-    for name in ("chase", "oracle"):
+    for name in ("stationary", "chase", "oracle"):
         controller = make_controller(name, env_cfg, delay=nominal_delay(config.delay, env_cfg))
         env = BallCatchEnv(env_cfg, delay=config.delay)
         results[name] = evaluate(env, controller, args.final_episodes, seed=EVAL_SEED)
+        env.close()
     for name, result in results.items():
         print(f"  {name:<24} success {result['success_rate']:6.1%} | mean return {result['mean_return']:+.3f}"
               f" | mean miss distance {result['mean_miss_distance']:.3f} m")
+
+    # Preserve every final metric and the evaluation protocol for multi-seed aggregation.
+    with open(os.path.join(out, "evaluation.json"), "w", encoding="utf-8") as stream:
+        json.dump({"config": asdict(config), "steps": agent.steps, "eval_seed": EVAL_SEED,
+                   "eval_episodes": args.final_episodes, "results": results}, stream, indent=2)
 
     plot_path = os.path.join(out, "training_curve.png")
     plot_curves(log.rows, plot_path, f"{config.variant} network, {config.delay} delay",

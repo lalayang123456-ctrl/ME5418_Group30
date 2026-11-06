@@ -1,6 +1,7 @@
 """Smoke tests: the command-line scripts run from start to finish."""
 
 import os
+import json
 import subprocess
 import sys
 import tempfile
@@ -54,8 +55,14 @@ class TrainScriptTest(unittest.TestCase):
                               "--final-episodes", "3", "--out", folder)
             self.assertEqual(done.returncode, 0, msg=done.stderr)
             self.assertIn("Held-out evaluation", done.stdout)
-            for name in ("model.pt", "train_log.csv", "training_curve.png"):
+            for name in ("model.pt", "train_log.csv", "training_curve.png", "evaluation.json"):
                 self.assertTrue(os.path.exists(os.path.join(folder, name)), name)
+            with open(os.path.join(folder, "evaluation.json"), encoding="utf-8") as stream:
+                evaluation = json.load(stream)
+            self.assertEqual(evaluation["config"]["variant"], "recurrent")
+            self.assertEqual(evaluation["eval_episodes"], 3)
+            self.assertEqual(evaluation["steps"], 256)
+            self.assertIn("stationary", evaluation["results"])
             with open(os.path.join(folder, "train_log.csv"), encoding="utf-8") as log:
                 self.assertEqual(len(log.readlines()), 1 + 2)  # header and two updates
 
@@ -64,6 +71,18 @@ class TrainScriptTest(unittest.TestCase):
             self.assertEqual(done.returncode, 0, msg=done.stderr)
             self.assertIn("recurrent network", done.stdout)
             self.assertEqual(done.stdout.count("episode "), 2)
+
+    def test_refuses_to_overwrite_previous_results(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, "model.pt")
+            with open(path, "wb") as stream:
+                stream.write(b"keep this checkpoint")
+            done = run_script("train.py", "--steps", "256", "--out", folder)
+            self.assertNotEqual(done.returncode, 0)
+            self.assertIn("choose a new --out folder", done.stderr)
+            with open(path, "rb") as stream:
+                self.assertEqual(stream.read(), b"keep this checkpoint")
+            self.assertFalse(os.path.exists(os.path.join(folder, "train_log.csv")))
 
 
 class CalibrateScriptTest(unittest.TestCase):
