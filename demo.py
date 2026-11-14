@@ -1,4 +1,4 @@
-"""Demo: watch the environment in action under a hand-written policy or a trained network.
+"""Demo: watch the environment in action under a policy or a trained network.
 
     python demo.py                                   live window, reactive "chase" policy, jitter
     python demo.py --policy random --delay burst     random policy, delay with a stall
@@ -70,7 +70,7 @@ def main(argv=None) -> None:
     args = parser.parse_args(argv)
 
     if args.model:
-        # Imported here so that the hand-written policies do not need PyTorch.
+        # Imported here so that the other policies do not need PyTorch.
         from agent import NetworkController, load_policy
         from networks.policies import env_config_for
 

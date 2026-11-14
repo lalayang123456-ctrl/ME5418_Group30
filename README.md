@@ -9,7 +9,7 @@ The research question the environment is built for: does telling a recurrent pol
 frame was captured (capture interval and observation age) help it beyond memory alone?
 
 **Current submission:** [Learning Agent Code Report](report/Learning%20Agent%20Code%20Report.pdf)
-(2 pages), covering the PPO training loop, evaluation against the hand-written controllers,
+(2 pages), covering the PPO training loop, evaluation against the other controllers,
 external libraries and implementation lessons.
 
 The LaTeX sources and supporting figure are in `report/`.
@@ -155,7 +155,7 @@ Every parameter lives in `ball_catch/config.py`.
 | Net limits | 6 m/s² and 3 m/s per axis, starting at rest in the workspace centre |
 | Catch radius | 0.23 m; the farthest crossing point is 1.31 m from the net's start |
 
-Success rate of three hand-written controllers. *Stationary* never moves. *Chase* is reactive and
+Success rate of three other controllers. *Stationary* never moves. *Chase* is reactive and
 non-privileged. *Oracle* is a privileged upper bound that knows the true interception point but
 only starts moving after the delay plus two camera periods.
 
@@ -265,7 +265,7 @@ settings in the pinned environment. Values are mean ± sample standard deviation
 | Controller | Uses | Caught | Mean return | Mean miss distance |
 |---|---|---|---|---|
 | Stationary | nothing | 5.3% | -0.41 | 0.70 m |
-| Chase (hand-written) | latest frame | 10.5% | -0.27 | 0.55 m |
+| Chase | latest frame | 10.5% | -0.27 | 0.55 m |
 | `single_frame` network | latest frame, net state | 13.4% ± 1.2 pp | -0.18 ± 0.03 | 0.51 ± 0.02 m |
 | `recurrent` network | + memory | 22.6% ± 3.0 pp | 0.00 ± 0.08 | 0.43 ± 0.05 m |
 | `temporal` network | + memory, capture interval, age | 28.0% ± 3.2 pp | +0.11 ± 0.05 | 0.37 ± 0.02 m |
@@ -282,7 +282,7 @@ The exact metrics are in [`multiseed_results.csv`](report/figures/multiseed_resu
 [`multiseed_summary.json`](report/figures/multiseed_summary.json).
 Regenerate the mean-and-SD figure with `python report/summarize_seeds.py --seeds 0 1 2`.
 
-A trained network plays through the same interface as the hand-written controllers
+A trained network plays through the same interface as the other controllers
 (`agent.NetworkController`), so `demo.py --model` shows or evaluates it exactly like them:
 
 ```
@@ -309,7 +309,7 @@ print(agent.evaluate(episodes=500)["success_rate"])
 | `ball_catch/delay.py` | Delay models and the frame queue (arrival, acceptance, discarding) |
 | `ball_catch/env.py` | `BallCatchEnv` (`gym.Env`): spaces, reset, step, reward, info |
 | `ball_catch/rendering.py` | Matplotlib visualisation (`render_mode="human"` or `"rgb_array"`) |
-| `ball_catch/controllers.py` | Hand-written reference controllers: random, stationary, chase, oracle |
+| `ball_catch/controllers.py` | Reference controllers: random, stationary, chase, oracle |
 | `ball_catch/evaluation.py` | Running and summarising episodes |
 | `demo.py` | Demo script |
 | `calibrate.py` | Pilot calibration: feasibility and sensitivity to delay |
@@ -321,7 +321,7 @@ print(agent.evaluate(episodes=500)["success_rate"])
 | `networks/demo.py` | Neural-network demo: forward and backward pass on environment data |
 | `networks/tests/` | Unit tests of the networks |
 | `agent/ppo_agent.py` | `TrainConfig` and `PPOAgent`: the PPO training loop, evaluation, saving and loading |
-| `agent/controller.py` | `NetworkController`: a trained network behind the hand-written controllers' interface |
+| `agent/controller.py` | `NetworkController`: a trained network behind the other controllers' interface |
 | `agent/tests/` | Unit tests of the learning agent |
 | `train.py` | Training script: log, learning curve, checkpoint and held-out comparison |
 | `run_seeds.py` | Repeat the same training protocol with independent seeds and separate output folders |

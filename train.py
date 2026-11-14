@@ -12,7 +12,7 @@ Writes to runs/<variant>_<delay>_seed<seed>/ (or --out):
     evaluation.json      configuration, evaluation protocol and per-throw outcomes
 
 Every --eval-every updates the deterministic policy (mean action) is evaluated on held-out throws.
-At the end it is compared with the hand-written chase and oracle controllers on the same throws.
+At the end it is compared with the chase and oracle controllers on the same throws.
 1M steps take about 9 minutes on one CPU core for the recurrent networks, 2 minutes for the MLP.
 """
 

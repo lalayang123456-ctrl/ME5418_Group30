@@ -1,4 +1,4 @@
-"""Hand-written reference controllers.
+"""Reference controllers.
 
 They serve three purposes: driving the demo, checking that the environment behaves sensibly, and
 calibrating the task (how hard is it with perfect information, and how much does delay cost?).

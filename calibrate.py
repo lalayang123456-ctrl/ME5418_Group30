@@ -4,7 +4,7 @@
     python calibrate.py --episodes 2000    more episodes, tighter estimates
     python calibrate.py --sweep            also sweep the net's acceleration and velocity limits
 
-Three hand-written controllers bracket the difficulty of the task for every delay:
+Three controllers bracket the difficulty of the task for every delay:
 
     stationary  the net never moves: what you get for free.
     chase       reactive and non-privileged: follows the line of sight to the last seen ball.

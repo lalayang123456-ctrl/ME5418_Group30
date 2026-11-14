@@ -52,8 +52,8 @@ script and 117 unit tests.
   \code{camera.py}      & Pinhole camera: where the ball appears in the image and how big it looks, with pixel noise. \\
   \code{delay.py}       & Delay models (fixed, jitter, burst, replayed sequence) and the queue that delivers frames. \\
   \code{env.py}         & \code{BallCatchEnv}, a \code{gym.Env}: spaces, \code{reset}, \code{step}, reward and \code{info}. \\
-  \code{rendering.py}   & Home-made Matplotlib visualisation (Figure~\ref{fig:render}). \\
-  \code{controllers.py} & Hand-written test policies: random, stationary, chase and a privileged oracle. \\
+  \code{rendering.py}   & Matplotlib visualisation (Figure~\ref{fig:render}). \\
+  \code{controllers.py} & Test policies: random, stationary, chase and a privileged oracle. \\
   \code{evaluation.py}  & Runs episodes and summarises success rate, return and delay statistics. \\
   \code{demo.py}, \code{calibrate.py} & Demo script; pilot calibration (Table~\ref{tab:calibration}). \\
   \code{tests/}         & Unit tests, including Gym's own environment checker. \\
@@ -177,7 +177,7 @@ study. The price was building our own visualisation.
 
 \textbf{Lessons learned.}
 \begin{itemize}
-  \item \textbf{Check that delay matters before training.} Hand-written controllers showed this in minutes.
+  \item \textbf{Check that delay matters before training.} Other controllers showed this in minutes.
   \item \textbf{Delay also means lost frames.} With $80 \pm 40$\,ms jitter, 36\% of frames are overtaken and
         discarded, leaving about 19 of 30 per second.
   \item \textbf{Reacting is not enough.} The chase policy catches only 19\% even without delay: on high,

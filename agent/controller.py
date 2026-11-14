@@ -1,4 +1,4 @@
-"""A trained network behind the same interface as the hand-written controllers.
+"""A trained network behind the same interface as the other controllers.
 
 `NetworkController` lets `ball_catch.evaluation` and `demo.py` run a network exactly like the
 chase or oracle controllers, so all of them can be compared on the same throws.
