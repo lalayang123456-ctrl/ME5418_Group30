@@ -30,6 +30,11 @@ class DemoScriptTest(unittest.TestCase):
         self.assertEqual(done.stdout.count("episode "), 3)
         self.assertIn("success rate", done.stdout)
 
+    def test_runs_the_predictive_baseline(self):
+        done = run_script("demo.py", "--policy", "predictive", "--no-render", "--episodes", "2")
+        self.assertEqual(done.returncode, 0, msg=done.stderr)
+        self.assertEqual(done.stdout.count("episode "), 2)
+
     def test_accepts_a_numeric_delay(self):
         done = run_script("demo.py", "--no-render", "--episodes", "1", "--delay", "0.15")
         self.assertEqual(done.returncode, 0, msg=done.stderr)
@@ -97,6 +102,19 @@ class TrainScriptTest(unittest.TestCase):
             with open(path, "rb") as stream:
                 self.assertEqual(stream.read(), b"keep this checkpoint")
             self.assertFalse(os.path.exists(os.path.join(folder, "train_log.csv")))
+
+
+class TunePredictiveScriptTest(unittest.TestCase):
+    def test_grid_search_reports_the_best_gains(self):
+        done = run_script("tune_predictive.py", "--episodes", "4", "--kp", "20", "40", "--kd", "10",
+                          "--min-frames", "3")
+        self.assertEqual(done.returncode, 0, msg=done.stderr)
+        self.assertIn("best: kp", done.stdout)
+        self.assertEqual(done.stdout.count("kp "), 2 + 1)  # one row per combination, plus the best
+
+    def test_refuses_held_out_seeds(self):
+        done = run_script("tune_predictive.py", "--episodes", "4", "--seed", "100000")
+        self.assertNotEqual(done.returncode, 0)
 
 
 class CalibrateScriptTest(unittest.TestCase):

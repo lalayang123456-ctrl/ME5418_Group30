@@ -8,6 +8,7 @@
     python demo.py --model runs/temporal_jitter_seed0/model.pt    network trained with train.py
 
 Policies (see ball_catch/controllers.py): random, stationary, chase (uses the observation only),
+predictive (uses the observation only: ballistic prediction from timestamped frames + PD control),
 oracle (privileged: reads the true interception point, but only starts moving after the typical
 frame delay plus two camera periods). `--model` replaces the policy by a trained network, which
 acts with the mean of its action distribution; the network decides whether timing inputs are used.
@@ -58,7 +59,8 @@ def describe(index: int, result: dict, cfg: EnvConfig) -> str:
 
 def main(argv=None) -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--policy", default="chase", choices=["random", "stationary", "chase", "oracle"])
+    parser.add_argument("--policy", default="chase",
+                        choices=["random", "stationary", "chase", "predictive", "oracle"])
     parser.add_argument("--delay", default="jitter", type=parse_delay)
     parser.add_argument("--episodes", type=int, default=3)
     parser.add_argument("--seed", type=int, default=0)
