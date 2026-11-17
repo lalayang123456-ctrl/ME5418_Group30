@@ -1,6 +1,7 @@
 """Repeat the unchanged training protocol with independent seeds.
 
     python run_seeds.py --seeds 1 2 --workers 2
+    python run_seeds.py --seeds 0 1 2 --variants recurrent temporal --aux-coef 0.5 --workers 6
 
 Existing complete runs are reused only when their saved protocol matches. Incomplete
 or different runs are refused by train.py; choose another --out-root to preserve them.
@@ -17,28 +18,42 @@ import subprocess
 import sys
 
 
-def run_one(variant, seed, args):
-    folder = Path(args.out_root) / f"{variant}_jitter_seed{seed}"
-    result_path = folder / "evaluation.json"
-    if result_path.exists():
-        from agent import TrainConfig
+def run_folder(out_root, variant, seed, aux_coef=0.0):
+    """runs/<variant>[_pred]_jitter_seed<seed>, as train.py names it."""
+    from agent import run_name
 
-        with result_path.open(encoding="utf-8") as stream:
-            previous = json.load(stream)
-        cfg = previous["config"]
-        expected = asdict(TrainConfig(variant=variant, seed=seed, total_steps=args.steps))
-        if (cfg == expected and previous["steps"] >= args.steps
-                and previous["eval_seed"] == 100_000
-                and previous["eval_episodes"] == args.final_episodes
-                and all((folder / name).exists() for name in ("model.pt", "train_log.csv", "training_curve.png"))):
-            return f"REUSED {folder}"
+    return Path(out_root) / run_name(variant, "jitter", seed, aux_coef)
+
+
+def reusable(folder, variant, seed, steps, final_episodes, aux_coef=0.0):
+    """True if `folder` holds a finished run of exactly this protocol."""
+    from agent import TrainConfig
+
+    result_path = Path(folder) / "evaluation.json"
+    if not result_path.exists():
+        return False
+    with result_path.open(encoding="utf-8") as stream:
+        previous = json.load(stream)
+    # Runs saved before the prediction option existed have no aux_coef: they trained without it.
+    cfg = {"aux_coef": 0.0, **previous["config"]}
+    expected = asdict(TrainConfig(variant=variant, seed=seed, total_steps=steps, aux_coef=aux_coef))
+    return (cfg == expected and previous["steps"] >= steps
+            and previous["eval_seed"] == 100_000
+            and previous["eval_episodes"] == final_episodes
+            and all((Path(folder) / name).exists() for name in ("model.pt", "train_log.csv", "training_curve.png")))
+
+
+def run_one(variant, seed, args):
+    folder = run_folder(args.out_root, variant, seed, args.aux_coef)
+    if reusable(folder, variant, seed, args.steps, args.final_episodes, args.aux_coef):
+        return f"REUSED {folder}"
     # Check before opening the log: failed reruns should preserve their diagnostics too.
     if folder.exists() and any(folder.iterdir()):
         raise RuntimeError(f"nonempty output folder: {folder}; choose a new --out-root")
     folder.mkdir(parents=True, exist_ok=True)
     command = [sys.executable, "-u", "train.py", "--variant", variant, "--seed", str(seed),
                "--steps", str(args.steps), "--final-episodes", str(args.final_episodes),
-               "--out", str(folder)]
+               "--aux-coef", str(args.aux_coef), "--out", str(folder)]
     environment = dict(os.environ, MPLBACKEND="Agg", PYTHONIOENCODING="utf-8",
                        OMP_NUM_THREADS="1", MKL_NUM_THREADS="1")
     print(f"START {folder}", flush=True)
@@ -58,9 +73,14 @@ def main():
     parser.add_argument("--steps", type=int, default=3_000_000)
     parser.add_argument("--final-episodes", type=int, default=1000)
     parser.add_argument("--out-root", default="runs")
+    parser.add_argument("--aux-coef", type=float, default=0.0,
+                        help="weight of the crossing-point prediction loss (recurrent variants only); "
+                             "runs go to <variant>_pred_jitter_seed<seed>")
     args = parser.parse_args()
     if args.workers < 1 or args.steps < 1 or args.final_episodes < 1 or min(args.seeds) < 0:
         parser.error("workers, steps and final-episodes must be positive; seeds must be nonnegative")
+    if args.aux_coef < 0 or (args.aux_coef > 0 and "single_frame" in args.variants):
+        parser.error("--aux-coef must be nonnegative and needs recurrent variants (--variants recurrent temporal)")
     if len(set(args.seeds)) != len(args.seeds) or len(set(args.variants)) != len(args.variants):
         parser.error("seeds and variants must not contain duplicates")
     # Paths and train.py always resolve relative to this repository.

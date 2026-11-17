@@ -35,6 +35,10 @@ class Rollout:
     episodes: int  # number of throws that ended inside the rollout
     catches: int  # how many of those were caught
     episode_returns: List[float] = field(default_factory=list)  # return of each of those throws
+    # [T, B, 2] where the ball of the throw each step belongs to crosses the net plane, normalised
+    # like the net position. Simulator ground truth: a training target for the auxiliary
+    # prediction loss only, never an input of the policy.
+    targets: Optional[torch.Tensor] = None
 
     def select(self, envs: torch.Tensor) -> "Rollout":
         """The same rollout restricted to some environments (columns), e.g. for a minibatch.
@@ -53,6 +57,7 @@ class Rollout:
             episode_start=self.episode_start[:, envs],
             initial_state=None if self.initial_state is None else self.initial_state[envs],
             last_value=self.last_value[envs],
+            targets=None if self.targets is None else self.targets[:, envs],
         )
 
 
@@ -67,14 +72,25 @@ class RolloutCollector:
     def __init__(self, envs: Sequence[BallCatchEnv], policy: ActorCritic, seed: int = 0):
         self.envs = list(envs)
         self.policy = policy
-        self.obs = np.stack([env.reset(seed=seed + i)[0] for i, env in enumerate(self.envs)])
+        first = [env.reset(seed=seed + i) for i, env in enumerate(self.envs)]
+        self.obs = np.stack([obs for obs, _ in first])
+        # Crossing point of the running throw of each environment (label of the auxiliary loss).
+        self.targets = np.stack([self._target(env, info) for env, (_, info) in zip(self.envs, first)])
         self.state = policy.initial_state(len(self.envs))
         self.start = torch.ones(len(self.envs))  # every environment begins a throw
         self._returns = np.zeros(len(self.envs))  # return so far of each running throw
 
+    @staticmethod
+    def _target(env: BallCatchEnv, info: dict) -> np.ndarray:
+        """The throw's crossing point, normalised over the workspace like the net position."""
+        cfg = env.cfg
+        return ((np.asarray(info["intercept"], dtype=float) - cfg.workspace_center)
+                / cfg.workspace_half_extent).astype(np.float32)
+
     def collect(self, steps: int) -> Rollout:
         """Run `steps` control steps in every environment, resetting each one after its throw ends."""
-        data = {key: [] for key in ("obs", "actions", "log_probs", "values", "rewards", "dones", "episode_start")}
+        data = {key: [] for key in ("obs", "actions", "log_probs", "values", "rewards", "dones",
+                                    "episode_start", "targets")}
         episode_returns: List[float] = []
         catches = 0
         initial_state = None if self.state is None else self.state.clone()
@@ -82,6 +98,8 @@ class RolloutCollector:
         for _ in range(steps):
             obs_t = torch.as_tensor(self.obs, dtype=torch.float32)  # [B, obs_dim]
             out = self.policy.act(obs_t, self.state, self.start)
+            # Labels of this step's observations, taken before a finished throw is replaced.
+            targets = torch.from_numpy(self.targets.copy())
             rewards = np.zeros(len(self.envs), dtype=np.float32)
             dones = np.zeros(len(self.envs), dtype=np.float32)
             next_obs = []
@@ -94,12 +112,13 @@ class RolloutCollector:
                     catches += int(info["caught"])
                     episode_returns.append(float(self._returns[i]))
                     self._returns[i] = 0.0
-                    obs, _ = env.reset()  # continues the environment's random stream
+                    obs, info = env.reset()  # continues the environment's random stream
+                    self.targets[i] = self._target(env, info)
                 next_obs.append(obs)
 
             step = dict(obs=obs_t, actions=out.action, log_probs=out.log_prob, values=out.value,
                         rewards=torch.from_numpy(rewards), dones=torch.from_numpy(dones),
-                        episode_start=self.start)
+                        episode_start=self.start, targets=targets)
             for key, value in step.items():
                 data[key].append(value)
 
@@ -156,19 +175,28 @@ def ppo_loss(
     clip: float = 0.2,
     value_coef: float = 0.5,
     entropy_coef: float = 0.0,
+    aux_coef: float = 0.0,
 ) -> Tuple[torch.Tensor, Dict[str, float]]:
     """Clipped PPO objective on a rollout or a minibatch of it (`Rollout.select`); the sequences
     are kept intact for the GRU.
 
         loss = -E[min(r A, clip(r, 1 - eps, 1 + eps) A)] + c_v E[(V - R)^2] - c_e E[entropy]
+               + c_aux E[|prediction - crossing point|^2]
 
-    with r = pi_new(a|s) / pi_old(a|s). Advantages are normalised per batch.
+    with r = pi_new(a|s) / pi_old(a|s). Advantages are normalised per batch. The last term is used
+    only when `aux_coef > 0` (a network with a prediction head, rollout with `targets`).
     Returns the loss (with gradients) and its components as plain numbers, including an estimate
     of KL(pi_old || pi_new) that shows how far the update has moved the policy.
     """
-    log_prob, entropy, value = policy.evaluate(
-        rollout.obs, rollout.actions, rollout.initial_state, rollout.episode_start
-    )
+    if aux_coef > 0.0:
+        log_prob, entropy, value, prediction = policy.evaluate(
+            rollout.obs, rollout.actions, rollout.initial_state, rollout.episode_start, with_prediction=True
+        )
+        aux_loss = ((prediction - rollout.targets) ** 2).sum(-1).mean()
+    else:
+        log_prob, entropy, value = policy.evaluate(
+            rollout.obs, rollout.actions, rollout.initial_state, rollout.episode_start
+        )
     adv = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
     log_ratio = log_prob - rollout.log_probs
     ratio = torch.exp(log_ratio)
@@ -184,6 +212,10 @@ def ppo_loss(
         "clip_fraction": float(((ratio - 1.0).abs() > clip).float().mean()),
         "approx_kl": float(((ratio - 1.0) - log_ratio).mean()),  # >= 0, unbiased (Schulman, 2020)
     }
+    if aux_coef > 0.0:
+        loss = loss + aux_coef * aux_loss
+        stats["loss"] = float(loss)
+        stats["aux_loss"] = float(aux_loss)
     return loss, stats
 
 

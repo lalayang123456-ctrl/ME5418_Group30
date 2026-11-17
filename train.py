@@ -3,9 +3,10 @@
     python train.py --out runs/new_temporal                temporal variant, jitter delay, 3M steps
     python train.py --variant recurrent --out runs/new_recurrent    memory without timestamps
     python train.py --variant single_frame --out runs/new_mlp       reactive baseline
+    python train.py --aux-coef 0.5 --out runs/new_temporal_pred     + crossing-point prediction
     python train.py --steps 20000 --final-episodes 50 --out runs/smoke_test   quick check
 
-Writes to runs/<variant>_<delay>_seed<seed>/ (or --out):
+Writes to runs/<variant>[_pred]_<delay>_seed<seed>/ (or --out):
     model.pt             network weights and training configuration (python demo.py --model ...)
     train_log.csv        one row per update: catch rate, return, losses, KL, held-out evaluations
     training_curve.png   catch rate and return over training
@@ -24,7 +25,7 @@ from dataclasses import asdict
 
 import torch
 
-from agent import EVAL_SEED, PPOAgent, TrainConfig
+from agent import EVAL_SEED, PPOAgent, TrainConfig, run_name
 from ball_catch.controllers import make_controller
 from ball_catch.delay import nominal_delay
 from ball_catch.env import BallCatchEnv
@@ -113,6 +114,8 @@ def main(argv=None) -> None:
     parser.add_argument("--lam", type=float, default=default.lam, help="GAE lambda")
     parser.add_argument("--normalize-obs", action=argparse.BooleanOptionalAction, default=default.normalize_obs,
                         help="standardise the inputs with running statistics")
+    parser.add_argument("--aux-coef", type=float, default=default.aux_coef,
+                        help="weight of the auxiliary crossing-point prediction loss (recurrent variants; 0: off)")
     parser.add_argument("--eval-every", type=int, default=50, help="updates between evaluations (0: never)")
     parser.add_argument("--eval-episodes", type=int, default=200, help="throws per evaluation during training")
     parser.add_argument("--final-episodes", type=int, default=1000, help="throws of the final comparison")
@@ -129,9 +132,9 @@ def main(argv=None) -> None:
     config = TrainConfig(
         variant=args.variant, delay=args.delay, total_steps=args.steps, seed=args.seed,
         num_envs=args.num_envs, rollout_steps=args.rollout_steps, epochs=args.epochs, lr=args.lr,
-        gamma=args.gamma, lam=args.lam, normalize_obs=args.normalize_obs,
+        gamma=args.gamma, lam=args.lam, normalize_obs=args.normalize_obs, aux_coef=args.aux_coef,
     )
-    out = args.out or os.path.join("runs", f"{args.variant}_{args.delay}_seed{args.seed}")
+    out = args.out or os.path.join("runs", run_name(args.variant, args.delay, args.seed, args.aux_coef))
     os.makedirs(out, exist_ok=True)
     # A quick check must not silently destroy the models used in the report.
     artifacts = ("model.pt", "train_log.csv", "training_curve.png", "evaluation.json")
@@ -141,7 +144,8 @@ def main(argv=None) -> None:
 
     agent = PPOAgent(config)
     n_params = sum(p.numel() for p in agent.policy.parameters())
-    print(f"variant {config.variant} ({n_params:,} parameters) | delay {config.delay} | "
+    prediction = f" + crossing-point prediction (weight {config.aux_coef})" if config.predict_crossing else ""
+    print(f"variant {config.variant}{prediction} ({n_params:,} parameters) | delay {config.delay} | "
           f"{agent.num_updates} updates of {config.batch_steps} steps | output {out}")
     print(f"{'update':>6} {'steps':>9} {'catch':>6} {'return':>7} {'value loss':>10} "
           f"{'KL':>7} {'clip':>5} {'std':>5} {'held-out':>8}")

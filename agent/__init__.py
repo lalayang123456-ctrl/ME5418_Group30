@@ -6,6 +6,6 @@ same interface as the other controllers. `python train.py` is the command-line f
 """
 
 from agent.controller import NetworkController
-from agent.ppo_agent import EVAL_SEED, PPOAgent, TrainConfig, load_policy
+from agent.ppo_agent import EVAL_SEED, PPOAgent, TrainConfig, load_policy, run_name
 
-__all__ = ["EVAL_SEED", "NetworkController", "PPOAgent", "TrainConfig", "load_policy"]
+__all__ = ["EVAL_SEED", "NetworkController", "PPOAgent", "TrainConfig", "load_policy", "run_name"]

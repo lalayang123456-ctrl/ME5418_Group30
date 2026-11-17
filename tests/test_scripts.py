@@ -72,6 +72,20 @@ class TrainScriptTest(unittest.TestCase):
             self.assertIn("recurrent network", done.stdout)
             self.assertEqual(done.stdout.count("episode "), 2)
 
+    def test_trains_with_the_crossing_point_prediction(self):
+        with tempfile.TemporaryDirectory() as folder:
+            done = run_script("train.py", "--variant", "temporal", "--aux-coef", "0.5", "--steps", "256",
+                              "--num-envs", "4", "--rollout-steps", "32", "--eval-every", "1",
+                              "--eval-episodes", "2", "--final-episodes", "3", "--out", folder)
+            self.assertEqual(done.returncode, 0, msg=done.stderr)
+            with open(os.path.join(folder, "evaluation.json"), encoding="utf-8") as stream:
+                self.assertEqual(json.load(stream)["config"]["aux_coef"], 0.5)
+            with open(os.path.join(folder, "train_log.csv"), encoding="utf-8") as log:
+                self.assertIn("aux_loss", log.readline())
+            done = run_script("demo.py", "--model", os.path.join(folder, "model.pt"), "--no-render",
+                              "--episodes", "2")
+            self.assertEqual(done.returncode, 0, msg=done.stderr)
+
     def test_refuses_to_overwrite_previous_results(self):
         with tempfile.TemporaryDirectory() as folder:
             path = os.path.join(folder, "model.pt")

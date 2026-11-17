@@ -57,12 +57,24 @@ class TrainConfig:
     max_grad_norm: float = 0.5  # gradients are clipped to this global norm
     hidden_size: int = 64
     normalize_obs: bool = True  # standardise the inputs with running statistics (ObservationNorm)
+    # Weight of the auxiliary loss that trains a head on the GRU memory to predict where the ball
+    # crosses the net plane ("Temporal-aware PPO + prediction", proposal section 4). 0 = off, the
+    # three variants of the Learning Agent milestone. The crossing point is a training target only.
+    aux_coef: float = 0.0
 
     def __post_init__(self):
         if self.variant not in VARIANTS:
             raise ValueError(f"unknown variant {self.variant!r}; choose from {sorted(VARIANTS)}")
         if self.num_envs % self.minibatches != 0:
             raise ValueError("num_envs must be a multiple of minibatches")
+        if self.aux_coef < 0.0:
+            raise ValueError("aux_coef must be nonnegative")
+        if self.aux_coef > 0.0 and not VARIANTS[self.variant][0]:
+            raise ValueError("the crossing-point prediction needs a recurrent variant")
+
+    @property
+    def predict_crossing(self) -> bool:
+        return self.aux_coef > 0.0
 
     @property
     def batch_steps(self) -> int:
@@ -76,7 +88,8 @@ class PPOAgent:
     def __init__(self, config: TrainConfig):
         self.config = config
         torch.manual_seed(config.seed)
-        self.policy = make_policy(config.variant, hidden_size=config.hidden_size)
+        self.policy = make_policy(config.variant, hidden_size=config.hidden_size,
+                                  predict_crossing=config.predict_crossing)
         self.optimiser = torch.optim.Adam(self.policy.parameters(), lr=config.lr, eps=1e-5)
         envs = [BallCatchEnv(env_config_for(config.variant), delay=config.delay)
                 for _ in range(config.num_envs)]
@@ -106,7 +119,7 @@ class PPOAgent:
                 envs = order[first:first + envs_per_batch]
                 loss, stats = ppo_loss(
                     self.policy, rollout.select(envs), advantages[:, envs], returns[:, envs],
-                    cfg.clip, cfg.value_coef, cfg.entropy_coef,
+                    cfg.clip, cfg.value_coef, cfg.entropy_coef, cfg.aux_coef,
                 )
                 self.optimiser.zero_grad()
                 loss.backward()
@@ -173,8 +186,15 @@ class PPOAgent:
 def load_policy(path: str) -> Tuple[ActorCritic, TrainConfig]:
     """Rebuild a trained network from a file written by `PPOAgent.save`."""
     checkpoint = torch.load(path, weights_only=True)
-    config = TrainConfig(**checkpoint["config"])
-    policy = make_policy(config.variant, hidden_size=config.hidden_size)
+    config = TrainConfig(**checkpoint["config"])  # older files have no aux_coef: default 0
+    policy = make_policy(config.variant, hidden_size=config.hidden_size,
+                         predict_crossing=config.predict_crossing)
     policy.load_state_dict(checkpoint["policy"])
     policy.eval()
     return policy, config
+
+
+def run_name(variant: str, delay, seed: int, aux_coef: float = 0.0) -> str:
+    """Folder name of a run in runs/: e.g. temporal_jitter_seed0, or temporal_pred_jitter_seed0
+    when trained with the crossing-point prediction."""
+    return f"{variant}{'_pred' if aux_coef > 0.0 else ''}_{delay}_seed{seed}"

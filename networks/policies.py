@@ -139,15 +139,25 @@ class ActorCritic(nn.Module):
         actions: torch.Tensor,
         state: Optional[torch.Tensor] = None,
         episode_start: Optional[torch.Tensor] = None,
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        with_prediction: bool = False,
+    ) -> Tuple[torch.Tensor, ...]:
         """Re-evaluate a stored sequence for the PPO update, with gradients.
 
         obs [T, B, obs_dim], actions [T, B, 2] -> log_prob [T, B], entropy [T, B], value [T, B].
         `state` must be the memory at the start of the sequence, as it was during the rollout.
+        With `with_prediction=True` (networks built with `predict_crossing=True`) a fourth tensor
+        [T, B, 2] is returned: the predicted crossing point, for the auxiliary loss.
         """
-        mean, value, _ = self(obs, state, episode_start)
+        if with_prediction:
+            mean, value, _, prediction = self.forward_with_prediction(obs, state, episode_start)
+        else:
+            mean, value, _ = self(obs, state, episode_start)
         dist = self.distribution(mean)
-        return dist.log_prob(actions).sum(-1), dist.entropy().sum(-1), value
+        out = (dist.log_prob(actions).sum(-1), dist.entropy().sum(-1), value)
+        return out + (prediction,) if with_prediction else out
+
+    def forward_with_prediction(self, obs, state=None, episode_start=None):
+        raise ValueError(f"{type(self).__name__} has no crossing-point prediction head")
 
 
 class MLPActorCritic(ActorCritic):
@@ -181,21 +191,42 @@ class RecurrentActorCritic(ActorCritic):
     The GRU is updated once per control step, so between camera frames it still sees the net
     state, the new-frame flag and (temporal variant) the growing observation age. Actor and critic
     share the encoder and the GRU, so one hidden state is carried through an episode.
+
+    With `predict_crossing=True` a third head reads the same memory and predicts where the ball
+    will cross the net plane (proposal: "Temporal-aware PPO + prediction"). It is trained with an
+    auxiliary loss on the simulator's crossing point, which is a training target only: the inputs
+    are unchanged, and acting never uses the prediction.
+
+                                                   -> predictor head -> crossing point (2)
     """
 
     recurrent = True
 
-    def __init__(self, obs_dim: int, hidden_size: int = 64, **kwargs):
+    def __init__(self, obs_dim: int, hidden_size: int = 64, predict_crossing: bool = False, **kwargs):
         super().__init__(obs_dim, hidden_size, **kwargs)
         self.encoder = nn.Sequential(_layer(obs_dim, hidden_size), nn.Tanh())
         self.gru = nn.GRUCell(hidden_size, hidden_size)
         self.actor = _head(hidden_size, hidden_size, ACTION_DIM, 0.01)
         self.critic = _head(hidden_size, hidden_size, 1, 1.0)
+        # Only created when asked for, so networks trained without it load exactly as before.
+        self.predictor = _head(hidden_size, hidden_size, 2, 1.0) if predict_crossing else None
 
     def initial_state(self, batch_size: int) -> torch.Tensor:
         return torch.zeros(batch_size, self.hidden_size)
 
     def forward(self, obs, state=None, episode_start=None):
+        memory, h = self._memory(obs, state, episode_start)
+        return self.actor(memory), self.critic(memory).squeeze(-1), h
+
+    def forward_with_prediction(self, obs, state=None, episode_start=None):
+        """As `forward`, plus the predicted crossing point [T, B, 2] from the same memory."""
+        if self.predictor is None:
+            return super().forward_with_prediction(obs, state, episode_start)
+        memory, h = self._memory(obs, state, episode_start)
+        return self.actor(memory), self.critic(memory).squeeze(-1), h, self.predictor(memory)
+
+    def _memory(self, obs, state=None, episode_start=None):
+        """GRU output at every step [T, B, H] and the final memory [B, H]."""
         steps, batch = obs.shape[:2]
         h = self.initial_state(batch) if state is None else state
         features = self.encoder(self.obs_norm(obs))  # [T, B, H], all steps at once
@@ -206,17 +237,23 @@ class RecurrentActorCritic(ActorCritic):
                 h = h * (1.0 - episode_start[t].unsqueeze(-1))
             h = self.gru(features[t], h)
             outputs.append(h)
-        memory = torch.stack(outputs)  # [T, B, H]
-        return self.actor(memory), self.critic(memory).squeeze(-1), h
+        return torch.stack(outputs), h  # [T, B, H], [B, H]
 
 
-def make_policy(variant: str, hidden_size: int = 64, **kwargs) -> ActorCritic:
-    """Build the network of one PPO variant: "single_frame", "recurrent" or "temporal"."""
+def make_policy(variant: str, hidden_size: int = 64, predict_crossing: bool = False, **kwargs) -> ActorCritic:
+    """Build the network of one PPO variant: "single_frame", "recurrent" or "temporal".
+
+    `predict_crossing=True` adds the crossing-point prediction head (recurrent variants only).
+    """
     if variant not in VARIANTS:
         raise ValueError(f"unknown variant {variant!r}; choose from {sorted(VARIANTS)}")
     recurrent, obs_dim = VARIANTS[variant]
-    cls = RecurrentActorCritic if recurrent else MLPActorCritic
-    return cls(obs_dim=obs_dim, hidden_size=hidden_size, **kwargs)
+    if not recurrent:
+        if predict_crossing:
+            raise ValueError("the crossing-point prediction head needs a recurrent variant")
+        return MLPActorCritic(obs_dim=obs_dim, hidden_size=hidden_size, **kwargs)
+    return RecurrentActorCritic(obs_dim=obs_dim, hidden_size=hidden_size,
+                                predict_crossing=predict_crossing, **kwargs)
 
 
 def env_config_for(variant: str, **overrides) -> EnvConfig:
