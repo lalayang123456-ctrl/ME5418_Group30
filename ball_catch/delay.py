@@ -146,6 +146,10 @@ def make_delay_model(spec: Union[str, float, DelayModel], cfg: EnvConfig) -> Del
         fractions = {"burst_early": 0.15, "burst_middle": 0.45, "burst_late": 0.75}
         base = JitterDelay(cfg.jitter_mean, cfg.jitter_std, cfg.delay_max)
         return BurstDelay(base, start_fraction=fractions[spec], n_frames=4, stall_delay=cfg.delay_max)
+    if spec == "dispersed":
+        return SequenceDelay([0.05, 0.20, 0.05, 0.05, 0.20, 0.05, 0.05, 0.20])
+    if spec == "clustered":
+        return SequenceDelay([0.05, 0.05, 0.05, 0.05, 0.20, 0.20, 0.20, 0.05])
     raise ValueError(f"unknown delay model: {spec!r}")
 
 
