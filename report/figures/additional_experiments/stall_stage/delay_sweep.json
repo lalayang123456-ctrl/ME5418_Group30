@@ -1,0 +1,1121 @@
+{
+  "protocol": {
+    "episodes": 1000,
+    "first_seed": 100000,
+    "delays": [
+      "none",
+      "0.05",
+      "0.1",
+      "0.15",
+      "0.2",
+      "jitter",
+      "burst"
+    ],
+    "runs": [
+      {
+        "controller": "single_frame",
+        "seed": 0,
+        "model": "runs\\single_frame_jitter_seed0\\model.pt"
+      },
+      {
+        "controller": "single_frame",
+        "seed": 1,
+        "model": "runs\\single_frame_jitter_seed1\\model.pt"
+      },
+      {
+        "controller": "single_frame",
+        "seed": 2,
+        "model": "runs\\single_frame_jitter_seed2\\model.pt"
+      },
+      {
+        "controller": "recurrent",
+        "seed": 0,
+        "model": "runs\\recurrent_jitter_seed0\\model.pt"
+      },
+      {
+        "controller": "recurrent",
+        "seed": 1,
+        "model": "runs\\recurrent_jitter_seed1\\model.pt"
+      },
+      {
+        "controller": "recurrent",
+        "seed": 2,
+        "model": "runs\\recurrent_jitter_seed2\\model.pt"
+      },
+      {
+        "controller": "temporal",
+        "seed": 0,
+        "model": "runs\\temporal_jitter_seed0\\model.pt"
+      },
+      {
+        "controller": "temporal",
+        "seed": 1,
+        "model": "runs\\temporal_jitter_seed1\\model.pt"
+      },
+      {
+        "controller": "temporal",
+        "seed": 2,
+        "model": "runs\\temporal_jitter_seed2\\model.pt"
+      },
+      {
+        "controller": "recurrent + prediction",
+        "seed": 0,
+        "model": "runs\\recurrent_pred_jitter_seed0\\model.pt"
+      },
+      {
+        "controller": "recurrent + prediction",
+        "seed": 1,
+        "model": "runs\\recurrent_pred_jitter_seed1\\model.pt"
+      },
+      {
+        "controller": "recurrent + prediction",
+        "seed": 2,
+        "model": "runs\\recurrent_pred_jitter_seed2\\model.pt"
+      },
+      {
+        "controller": "recurrent + prediction",
+        "seed": 3,
+        "model": "runs\\recurrent_pred_jitter_seed3\\model.pt"
+      },
+      {
+        "controller": "recurrent + prediction",
+        "seed": 4,
+        "model": "runs\\recurrent_pred_jitter_seed4\\model.pt"
+      },
+      {
+        "controller": "temporal + prediction",
+        "seed": 0,
+        "model": "runs\\temporal_pred_jitter_seed0\\model.pt"
+      },
+      {
+        "controller": "temporal + prediction",
+        "seed": 1,
+        "model": "runs\\temporal_pred_jitter_seed1\\model.pt"
+      },
+      {
+        "controller": "temporal + prediction",
+        "seed": 2,
+        "model": "runs\\temporal_pred_jitter_seed2\\model.pt"
+      },
+      {
+        "controller": "temporal + prediction",
+        "seed": 3,
+        "model": "runs\\temporal_pred_jitter_seed3\\model.pt"
+      },
+      {
+        "controller": "temporal + prediction",
+        "seed": 4,
+        "model": "runs\\temporal_pred_jitter_seed4\\model.pt"
+      }
+    ]
+  },
+  "delay_statistics": {
+    "none": {
+      "mean_obs_age": 0.01689207304724782,
+      "max_obs_age": 0.03332807681619182,
+      "mean_capture_interval": 0.033333333333333326,
+      "discard_fraction": 0.0
+    },
+    "0.05": {
+      "mean_obs_age": 0.06686265749078528,
+      "max_obs_age": 0.08332807681619181,
+      "mean_capture_interval": 0.033333333333333326,
+      "discard_fraction": 0.0
+    },
+    "0.1": {
+      "mean_obs_age": 0.11688202350158462,
+      "max_obs_age": 0.1333280768161918,
+      "mean_capture_interval": 0.033333333333333326,
+      "discard_fraction": 0.0
+    },
+    "0.15": {
+      "mean_obs_age": 0.16684717276122746,
+      "max_obs_age": 0.1833280768161918,
+      "mean_capture_interval": 0.033333333333333326,
+      "discard_fraction": 0.0
+    },
+    "0.2": {
+      "mean_obs_age": 0.2168685585450668,
+      "max_obs_age": 0.23332807681619183,
+      "mean_capture_interval": 0.033333333333333326,
+      "discard_fraction": 0.0
+    },
+    "jitter": {
+      "mean_obs_age": 0.08833229899893434,
+      "max_obs_age": 0.22167276662284946,
+      "mean_capture_interval": 0.05374912665944282,
+      "discard_fraction": 0.36129662811532826
+    },
+    "burst": {
+      "mean_obs_age": 0.10166624966564336,
+      "max_obs_age": 0.23332807681619175,
+      "mean_capture_interval": 0.06036788918669336,
+      "discard_fraction": 0.4197667280540209
+    }
+  },
+  "summary": {
+    "single_frame": {
+      "none": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.18566666666666667,
+          "sd": 0.016502525059315418
+        },
+        "mean_return": {
+          "mean": -0.044068284491443135,
+          "sd": 0.03246668305680379
+        },
+        "mean_miss_distance": {
+          "mean": 0.432968842127514,
+          "sd": 0.017589448131619376
+        }
+      },
+      "0.05": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.14766666666666667,
+          "sd": 0.01484362938547488
+        },
+        "mean_return": {
+          "mean": -0.1378410336978696,
+          "sd": 0.03657234120868083
+        },
+        "mean_miss_distance": {
+          "mean": 0.48387954844730585,
+          "sd": 0.021572451284947804
+        }
+      },
+      "0.1": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.11833333333333333,
+          "sd": 0.009237604307034013
+        },
+        "mean_return": {
+          "mean": -0.2176110794992481,
+          "sd": 0.03632992699461598
+        },
+        "mean_miss_distance": {
+          "mean": 0.531534354893355,
+          "sd": 0.02541282440622057
+        }
+      },
+      "0.15": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.09533333333333333,
+          "sd": 0.013576941236277538
+        },
+        "mean_return": {
+          "mean": -0.28389928285912996,
+          "sd": 0.04506924655628298
+        },
+        "mean_miss_distance": {
+          "mean": 0.5741284690831401,
+          "sd": 0.029815619287796184
+        }
+      },
+      "0.2": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.08233333333333333,
+          "sd": 0.00929157324317757
+        },
+        "mean_return": {
+          "mean": -0.3315543524815644,
+          "sd": 0.04391534655216395
+        },
+        "mean_miss_distance": {
+          "mean": 0.6103324362044638,
+          "sd": 0.03319979426498618
+        }
+      },
+      "jitter": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.13366666666666666,
+          "sd": 0.012423096769056143
+        },
+        "mean_return": {
+          "mean": -0.18334859916515456,
+          "sd": 0.03468071186003547
+        },
+        "mean_miss_distance": {
+          "mean": 0.5134632585301927,
+          "sd": 0.022131412051839813
+        }
+      },
+      "burst": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.12433333333333334,
+          "sd": 0.009291573243177578
+        },
+        "mean_return": {
+          "mean": -0.2161578682112804,
+          "sd": 0.02943752010150716
+        },
+        "mean_miss_distance": {
+          "mean": 0.5353169242168615,
+          "sd": 0.02099181354189062
+        }
+      }
+    },
+    "recurrent": {
+      "none": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.31266666666666665,
+          "sd": 0.03323151115031234
+        },
+        "mean_return": {
+          "mean": 0.19355386328326993,
+          "sd": 0.057736697218739794
+        },
+        "mean_miss_distance": {
+          "mean": 0.335021339555097,
+          "sd": 0.016020327367619613
+        }
+      },
+      "0.05": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.2573333333333333,
+          "sd": 0.02702468007827905
+        },
+        "mean_return": {
+          "mean": 0.07796370256590716,
+          "sd": 0.0700219259131853
+        },
+        "mean_miss_distance": {
+          "mean": 0.3874670874075925,
+          "sd": 0.03440765554166665
+        }
+      },
+      "0.1": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.19433333333333333,
+          "sd": 0.04712041312778712
+        },
+        "mean_return": {
+          "mean": -0.06147972856866315,
+          "sd": 0.12975998465102317
+        },
+        "mean_miss_distance": {
+          "mean": 0.45783360090464087,
+          "sd": 0.0749696301294816
+        }
+      },
+      "0.15": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.14566666666666667,
+          "sd": 0.04135617648348712
+        },
+        "mean_return": {
+          "mean": -0.1926481270467748,
+          "sd": 0.16388538542180406
+        },
+        "mean_miss_distance": {
+          "mean": 0.5408341297600713,
+          "sd": 0.12482939095960201
+        }
+      },
+      "0.2": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.117,
+          "sd": 0.045574115460423364
+        },
+        "mean_return": {
+          "mean": -0.2985211031527544,
+          "sd": 0.20293227999378888
+        },
+        "mean_miss_distance": {
+          "mean": 0.6272807216287133,
+          "sd": 0.17800305402313255
+        }
+      },
+      "jitter": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.22633333333333333,
+          "sd": 0.030435724623102584
+        },
+        "mean_return": {
+          "mean": 0.0012466842200380228,
+          "sd": 0.08460907732964651
+        },
+        "mean_miss_distance": {
+          "mean": 0.42631816100706665,
+          "sd": 0.04797406228434081
+        }
+      },
+      "burst": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.20266666666666666,
+          "sd": 0.028571547618799615
+        },
+        "mean_return": {
+          "mean": -0.05423436093169308,
+          "sd": 0.0783255199531639
+        },
+        "mean_miss_distance": {
+          "mean": 0.45437166154036374,
+          "sd": 0.044437177618062075
+        }
+      }
+    },
+    "temporal": {
+      "none": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.37466666666666665,
+          "sd": 0.065041012702243
+        },
+        "mean_return": {
+          "mean": 0.27710780141199653,
+          "sd": 0.09302573257466994
+        },
+        "mean_miss_distance": {
+          "mean": 0.32187010068521354,
+          "sd": 0.024983673099379322
+        }
+      },
+      "0.05": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.3463333333333333,
+          "sd": 0.045981880489311594
+        },
+        "mean_return": {
+          "mean": 0.22944995674055008,
+          "sd": 0.07215149597506873
+        },
+        "mean_miss_distance": {
+          "mean": 0.3389462211626938,
+          "sd": 0.01752468044955429
+        }
+      },
+      "0.1": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.2506666666666667,
+          "sd": 0.03743438704364391
+        },
+        "mean_return": {
+          "mean": 0.06691248833703524,
+          "sd": 0.05658031382253139
+        },
+        "mean_miss_distance": {
+          "mean": 0.3948875802536873,
+          "sd": 0.015885512061638244
+        }
+      },
+      "0.15": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.156,
+          "sd": 0.03371943060017473
+        },
+        "mean_return": {
+          "mean": -0.1183745768237649,
+          "sd": 0.07437765185469004
+        },
+        "mean_miss_distance": {
+          "mean": 0.47581339487506175,
+          "sd": 0.041670677841474914
+        }
+      },
+      "0.2": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.11733333333333333,
+          "sd": 0.025890796305508522
+        },
+        "mean_return": {
+          "mean": -0.23037519038290497,
+          "sd": 0.08727975497384498
+        },
+        "mean_miss_distance": {
+          "mean": 0.5441278309977554,
+          "sd": 0.05606184151033669
+        }
+      },
+      "jitter": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.2796666666666667,
+          "sd": 0.0319739477283199
+        },
+        "mean_return": {
+          "mean": 0.11392495795953958,
+          "sd": 0.05136534459676296
+        },
+        "mean_miss_distance": {
+          "mean": 0.3746349197000792,
+          "sd": 0.016047146154712064
+        }
+      },
+      "burst": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.23633333333333334,
+          "sd": 0.0178978583448784
+        },
+        "mean_return": {
+          "mean": 0.029395214505543527,
+          "sd": 0.03389399701704102
+        },
+        "mean_miss_distance": {
+          "mean": 0.40910420139573,
+          "sd": 0.013788135196308678
+        }
+      }
+    },
+    "recurrent + prediction": {
+      "none": {
+        "n": 5,
+        "success_rate": {
+          "mean": 0.6282,
+          "sd": 0.1321616434522513
+        },
+        "mean_return": {
+          "mean": 0.678774496489545,
+          "sd": 0.1861765414908753
+        },
+        "mean_miss_distance": {
+          "mean": 0.21079801709736742,
+          "sd": 0.03526171975663388
+        }
+      },
+      "0.05": {
+        "n": 5,
+        "success_rate": {
+          "mean": 0.6934,
+          "sd": 0.1316445973065359
+        },
+        "mean_return": {
+          "mean": 0.7770252000345603,
+          "sd": 0.19315776795752973
+        },
+        "mean_miss_distance": {
+          "mean": 0.19584847338590913,
+          "sd": 0.0384147866056466
+        }
+      },
+      "0.1": {
+        "n": 5,
+        "success_rate": {
+          "mean": 0.629,
+          "sd": 0.09672383367092102
+        },
+        "mean_return": {
+          "mean": 0.6843582510419721,
+          "sd": 0.15077021265958382
+        },
+        "mean_miss_distance": {
+          "mean": 0.21920064458420274,
+          "sd": 0.03585303471571901
+        }
+      },
+      "0.15": {
+        "n": 5,
+        "success_rate": {
+          "mean": 0.5104,
+          "sd": 0.07481510542664496
+        },
+        "mean_return": {
+          "mean": 0.4864607886530579,
+          "sd": 0.12669351598210243
+        },
+        "mean_miss_distance": {
+          "mean": 0.27435824710493845,
+          "sd": 0.03732800963653709
+        }
+      },
+      "0.2": {
+        "n": 5,
+        "success_rate": {
+          "mean": 0.3468,
+          "sd": 0.08641006885774365
+        },
+        "mean_return": {
+          "mean": 0.2282635405153696,
+          "sd": 0.16014068789059865
+        },
+        "mean_miss_distance": {
+          "mean": 0.3476073102772447,
+          "sd": 0.05722502278402497
+        }
+      },
+      "jitter": {
+        "n": 5,
+        "success_rate": {
+          "mean": 0.6894,
+          "sd": 0.07462774283066588
+        },
+        "mean_return": {
+          "mean": 0.7660900558481741,
+          "sd": 0.1243679198677944
+        },
+        "mean_miss_distance": {
+          "mean": 0.20061443426001307,
+          "sd": 0.03363816407281672
+        }
+      },
+      "burst": {
+        "n": 5,
+        "success_rate": {
+          "mean": 0.563,
+          "sd": 0.07594076639065475
+        },
+        "mean_return": {
+          "mean": 0.5650788428880655,
+          "sd": 0.1337503277352157
+        },
+        "mean_miss_distance": {
+          "mean": 0.25276153621119196,
+          "sd": 0.04277935941774935
+        }
+      }
+    },
+    "temporal + prediction": {
+      "none": {
+        "n": 5,
+        "success_rate": {
+          "mean": 0.7676000000000001,
+          "sd": 0.17661058858403705
+        },
+        "mean_return": {
+          "mean": 0.8832111079723053,
+          "sd": 0.27100992250201983
+        },
+        "mean_miss_distance": {
+          "mean": 0.17219172441960576,
+          "sd": 0.05702074409678366
+        }
+      },
+      "0.05": {
+        "n": 5,
+        "success_rate": {
+          "mean": 0.8846,
+          "sd": 0.0928994079636679
+        },
+        "mean_return": {
+          "mean": 1.0830009567400236,
+          "sd": 0.16495760013969127
+        },
+        "mean_miss_distance": {
+          "mean": 0.12864285496950387,
+          "sd": 0.036910586150232835
+        }
+      },
+      "0.1": {
+        "n": 5,
+        "success_rate": {
+          "mean": 0.7748,
+          "sd": 0.08940749409305687
+        },
+        "mean_return": {
+          "mean": 0.901727567557925,
+          "sd": 0.14192795663385788
+        },
+        "mean_miss_distance": {
+          "mean": 0.1708873856032449,
+          "sd": 0.02988949024671805
+        }
+      },
+      "0.15": {
+        "n": 5,
+        "success_rate": {
+          "mean": 0.5146000000000001,
+          "sd": 0.06350433056099403
+        },
+        "mean_return": {
+          "mean": 0.49457633272100654,
+          "sd": 0.09857428138101239
+        },
+        "mean_miss_distance": {
+          "mean": 0.2691625019154897,
+          "sd": 0.02760732498742467
+        }
+      },
+      "0.2": {
+        "n": 5,
+        "success_rate": {
+          "mean": 0.2832,
+          "sd": 0.03001166439902992
+        },
+        "mean_return": {
+          "mean": 0.10761186967718772,
+          "sd": 0.05712633513802734
+        },
+        "mean_miss_distance": {
+          "mean": 0.39135240456760584,
+          "sd": 0.024542160616561615
+        }
+      },
+      "jitter": {
+        "n": 5,
+        "success_rate": {
+          "mean": 0.816,
+          "sd": 0.08624094155330168
+        },
+        "mean_return": {
+          "mean": 0.9683222149445486,
+          "sd": 0.14775402842657256
+        },
+        "mean_miss_distance": {
+          "mean": 0.15420930665616914,
+          "sd": 0.0336595574693676
+        }
+      },
+      "burst": {
+        "n": 5,
+        "success_rate": {
+          "mean": 0.7134,
+          "sd": 0.07321406968609245
+        },
+        "mean_return": {
+          "mean": 0.8004137013743797,
+          "sd": 0.12144584194315297
+        },
+        "mean_miss_distance": {
+          "mean": 0.19257112033987106,
+          "sd": 0.027881992800434085
+        }
+      }
+    },
+    "stationary": {
+      "none": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.053,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": -0.4141535619947384,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.7020454448295916,
+          "sd": null
+        }
+      },
+      "0.05": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.053,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": -0.4141535619947384,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.7020454448295916,
+          "sd": null
+        }
+      },
+      "0.1": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.053,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": -0.4141535619947384,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.7020454448295916,
+          "sd": null
+        }
+      },
+      "0.15": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.053,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": -0.4141535619947384,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.7020454448295916,
+          "sd": null
+        }
+      },
+      "0.2": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.053,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": -0.4141535619947384,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.7020454448295916,
+          "sd": null
+        }
+      },
+      "jitter": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.053,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": -0.4141535619947384,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.7020454448295916,
+          "sd": null
+        }
+      },
+      "burst": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.053,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": -0.4141535619947384,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.7020454448295916,
+          "sd": null
+        }
+      }
+    },
+    "chase": {
+      "none": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.177,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": -0.07424746262727859,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.4360941602545352,
+          "sd": null
+        }
+      },
+      "0.05": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.124,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": -0.1990674222807569,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.5061278115825704,
+          "sd": null
+        }
+      },
+      "0.1": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.099,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": -0.2793279291927566,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.5622728234339135,
+          "sd": null
+        }
+      },
+      "0.15": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.082,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": -0.3383011565994029,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.6066603800683501,
+          "sd": null
+        }
+      },
+      "0.2": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.073,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": -0.37806337664428463,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.6411195977161072,
+          "sd": null
+        }
+      },
+      "jitter": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.105,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": -0.2722386766132932,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.5529633654938491,
+          "sd": null
+        }
+      },
+      "burst": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.099,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": -0.30338545969344505,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.5765942078087696,
+          "sd": null
+        }
+      }
+    },
+    "predictive": {
+      "none": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.845,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": 1.0111304394082723,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.14602645645426088,
+          "sd": null
+        }
+      },
+      "0.05": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.756,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": 0.8704021362702413,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.17736821687133794,
+          "sd": null
+        }
+      },
+      "0.1": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.649,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": 0.7098185262585357,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.2130759338604241,
+          "sd": null
+        }
+      },
+      "0.15": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.544,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": 0.5508246999405461,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.2525938189890735,
+          "sd": null
+        }
+      },
+      "0.2": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.458,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": 0.4109291239501167,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.29507216021634597,
+          "sd": null
+        }
+      },
+      "jitter": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.624,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": 0.6581341760576372,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.2362190211694613,
+          "sd": null
+        }
+      },
+      "burst": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.543,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": 0.5201903321730816,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.27993649308729923,
+          "sd": null
+        }
+      }
+    },
+    "oracle": {
+      "none": {
+        "n": 1,
+        "success_rate": {
+          "mean": 1.0,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": 1.4306077134407877,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.009775338406457732,
+          "sd": null
+        }
+      },
+      "0.05": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.989,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": 1.4026484052264123,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.018139106181294346,
+          "sd": null
+        }
+      },
+      "0.1": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.949,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": 1.3281425312279564,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.03639130663726084,
+          "sd": null
+        }
+      },
+      "0.15": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.923,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": 1.2803726097527752,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.049031925630133276,
+          "sd": null
+        }
+      },
+      "0.2": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.876,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": 1.1939789726345809,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.07336496127136385,
+          "sd": null
+        }
+      },
+      "jitter": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.974,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": 1.371881341042499,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.026179756640242965,
+          "sd": null
+        }
+      },
+      "burst": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.974,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": 1.371881341042499,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.026179756640242965,
+          "sd": null
+        }
+      }
+    }
+  }
+}

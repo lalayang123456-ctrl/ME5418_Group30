@@ -1,0 +1,411 @@
+{
+  "protocol": {
+    "episodes": 1000,
+    "first_seed": 100000,
+    "delays": [
+      "dispersed",
+      "clustered"
+    ],
+    "runs": [
+      {
+        "controller": "single_frame",
+        "seed": 0,
+        "model": "runs/single_frame_jitter_seed0/model.pt"
+      },
+      {
+        "controller": "single_frame",
+        "seed": 1,
+        "model": "runs/single_frame_jitter_seed1/model.pt"
+      },
+      {
+        "controller": "single_frame",
+        "seed": 2,
+        "model": "runs/single_frame_jitter_seed2/model.pt"
+      },
+      {
+        "controller": "recurrent",
+        "seed": 0,
+        "model": "runs/recurrent_jitter_seed0/model.pt"
+      },
+      {
+        "controller": "recurrent",
+        "seed": 1,
+        "model": "runs/recurrent_jitter_seed1/model.pt"
+      },
+      {
+        "controller": "recurrent",
+        "seed": 2,
+        "model": "runs/recurrent_jitter_seed2/model.pt"
+      },
+      {
+        "controller": "temporal",
+        "seed": 0,
+        "model": "runs/temporal_jitter_seed0/model.pt"
+      },
+      {
+        "controller": "temporal",
+        "seed": 1,
+        "model": "runs/temporal_jitter_seed1/model.pt"
+      },
+      {
+        "controller": "temporal",
+        "seed": 2,
+        "model": "runs/temporal_jitter_seed2/model.pt"
+      },
+      {
+        "controller": "recurrent + prediction",
+        "seed": 0,
+        "model": "runs/recurrent_pred_jitter_seed0/model.pt"
+      },
+      {
+        "controller": "recurrent + prediction",
+        "seed": 1,
+        "model": "runs/recurrent_pred_jitter_seed1/model.pt"
+      },
+      {
+        "controller": "recurrent + prediction",
+        "seed": 2,
+        "model": "runs/recurrent_pred_jitter_seed2/model.pt"
+      },
+      {
+        "controller": "recurrent + prediction",
+        "seed": 3,
+        "model": "runs/recurrent_pred_jitter_seed3/model.pt"
+      },
+      {
+        "controller": "recurrent + prediction",
+        "seed": 4,
+        "model": "runs/recurrent_pred_jitter_seed4/model.pt"
+      },
+      {
+        "controller": "temporal + prediction",
+        "seed": 0,
+        "model": "runs/temporal_pred_jitter_seed0/model.pt"
+      },
+      {
+        "controller": "temporal + prediction",
+        "seed": 1,
+        "model": "runs/temporal_pred_jitter_seed1/model.pt"
+      },
+      {
+        "controller": "temporal + prediction",
+        "seed": 2,
+        "model": "runs/temporal_pred_jitter_seed2/model.pt"
+      },
+      {
+        "controller": "temporal + prediction",
+        "seed": 3,
+        "model": "runs/temporal_pred_jitter_seed3/model.pt"
+      },
+      {
+        "controller": "temporal + prediction",
+        "seed": 4,
+        "model": "runs/temporal_pred_jitter_seed4/model.pt"
+      }
+    ]
+  },
+  "delay_statistics": {
+    "dispersed": {
+      "mean_obs_age": 0.07912326956269375,
+      "max_obs_age": 0.11666141014952514,
+      "mean_capture_interval": 0.053174497052082194,
+      "discard_fraction": 0.3232890490758979
+    },
+    "clustered": {
+      "mean_obs_age": 0.0899738223546941,
+      "max_obs_age": 0.1833280768161918,
+      "mean_capture_interval": 0.0511279505195527,
+      "discard_fraction": 0.3063886908007886
+    }
+  },
+  "summary": {
+    "single_frame": {
+      "dispersed": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.13966666666666666,
+          "sd": 0.012423096769056145
+        },
+        "mean_return": {
+          "mean": -0.16264817074592608,
+          "sd": 0.030984952965820704
+        },
+        "mean_miss_distance": {
+          "mean": 0.4993986380907204,
+          "sd": 0.01982519498142912
+        }
+      },
+      "clustered": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.12733333333333333,
+          "sd": 0.017214335111567138
+        },
+        "mean_return": {
+          "mean": -0.20649792157714505,
+          "sd": 0.047600930229406216
+        },
+        "mean_miss_distance": {
+          "mean": 0.5274978753824372,
+          "sd": 0.029810712702122665
+        }
+      }
+    },
+    "recurrent": {
+      "dispersed": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.25533333333333336,
+          "sd": 0.02983845393671284
+        },
+        "mean_return": {
+          "mean": 0.06607278904309791,
+          "sd": 0.07230117690121082
+        },
+        "mean_miss_distance": {
+          "mean": 0.3959119309710201,
+          "sd": 0.033472538976229364
+        }
+      },
+      "clustered": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.23366666666666666,
+          "sd": 0.035571524191877604
+        },
+        "mean_return": {
+          "mean": 0.008691369659761734,
+          "sd": 0.07368942687787647
+        },
+        "mean_miss_distance": {
+          "mean": 0.4251418300692487,
+          "sd": 0.0321681159750553
+        }
+      }
+    },
+    "temporal": {
+      "dispersed": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.31533333333333335,
+          "sd": 0.0417412665516193
+        },
+        "mean_return": {
+          "mean": 0.18258938859892176,
+          "sd": 0.06927872951334574
+        },
+        "mean_miss_distance": {
+          "mean": 0.3493300362828005,
+          "sd": 0.018933775230240583
+        }
+      },
+      "clustered": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.2533333333333333,
+          "sd": 0.04501481237696469
+        },
+        "mean_return": {
+          "mean": 0.0632163631412157,
+          "sd": 0.07099972967211549
+        },
+        "mean_miss_distance": {
+          "mean": 0.39273855087974674,
+          "sd": 0.020657815117134312
+        }
+      }
+    },
+    "recurrent + prediction": {
+      "dispersed": {
+        "n": 5,
+        "success_rate": {
+          "mean": 0.7648,
+          "sd": 0.08803238040630276
+        },
+        "mean_return": {
+          "mean": 0.8840538389851382,
+          "sd": 0.13924969534738538
+        },
+        "mean_miss_distance": {
+          "mean": 0.17384986603025104,
+          "sd": 0.0326493254987719
+        }
+      },
+      "clustered": {
+        "n": 5,
+        "success_rate": {
+          "mean": 0.7148,
+          "sd": 0.1103820637603773
+        },
+        "mean_return": {
+          "mean": 0.8040169590394564,
+          "sd": 0.17766003722023183
+        },
+        "mean_miss_distance": {
+          "mean": 0.19417813665136588,
+          "sd": 0.04553746458878248
+        }
+      }
+    },
+    "temporal + prediction": {
+      "dispersed": {
+        "n": 5,
+        "success_rate": {
+          "mean": 0.8794000000000001,
+          "sd": 0.07834730371876242
+        },
+        "mean_return": {
+          "mean": 1.0729886159983408,
+          "sd": 0.14154527975950829
+        },
+        "mean_miss_distance": {
+          "mean": 0.13090410562927035,
+          "sd": 0.03255745382161701
+        }
+      },
+      "clustered": {
+        "n": 5,
+        "success_rate": {
+          "mean": 0.8286,
+          "sd": 0.07932401906106375
+        },
+        "mean_return": {
+          "mean": 0.9859031399820584,
+          "sd": 0.1333909939321065
+        },
+        "mean_miss_distance": {
+          "mean": 0.15032964167967794,
+          "sd": 0.029393310944559915
+        }
+      }
+    },
+    "stationary": {
+      "dispersed": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.053,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": -0.4141535619947384,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.7020454448295916,
+          "sd": null
+        }
+      },
+      "clustered": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.053,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": -0.4141535619947384,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.7020454448295916,
+          "sd": null
+        }
+      }
+    },
+    "chase": {
+      "dispersed": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.113,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": -0.2458419255823392,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.5337022099150301,
+          "sd": null
+        }
+      },
+      "clustered": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.095,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": -0.3092588075508264,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.5765401710734724,
+          "sd": null
+        }
+      }
+    },
+    "predictive": {
+      "dispersed": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.642,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": 0.7038553722837932,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.21356207806758376,
+          "sd": null
+        }
+      },
+      "clustered": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.646,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": 0.6960736936984606,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.2218128704035859,
+          "sd": null
+        }
+      }
+    },
+    "oracle": {
+      "dispersed": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.949,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": 1.3281425312279564,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.03639130663726084,
+          "sd": null
+        }
+      },
+      "clustered": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.949,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": 1.3281425312279564,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.03639130663726084,
+          "sd": null
+        }
+      }
+    }
+  }
+}

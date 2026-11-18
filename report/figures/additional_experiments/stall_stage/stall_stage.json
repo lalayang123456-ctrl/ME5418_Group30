@@ -1,0 +1,553 @@
+{
+  "protocol": {
+    "episodes": 1000,
+    "first_seed": 100000,
+    "delays": [
+      "burst_early",
+      "burst_middle",
+      "burst_late"
+    ],
+    "runs": [
+      {
+        "controller": "single_frame",
+        "seed": 0,
+        "model": "runs/single_frame_jitter_seed0/model.pt"
+      },
+      {
+        "controller": "single_frame",
+        "seed": 1,
+        "model": "runs/single_frame_jitter_seed1/model.pt"
+      },
+      {
+        "controller": "single_frame",
+        "seed": 2,
+        "model": "runs/single_frame_jitter_seed2/model.pt"
+      },
+      {
+        "controller": "recurrent",
+        "seed": 0,
+        "model": "runs/recurrent_jitter_seed0/model.pt"
+      },
+      {
+        "controller": "recurrent",
+        "seed": 1,
+        "model": "runs/recurrent_jitter_seed1/model.pt"
+      },
+      {
+        "controller": "recurrent",
+        "seed": 2,
+        "model": "runs/recurrent_jitter_seed2/model.pt"
+      },
+      {
+        "controller": "temporal",
+        "seed": 0,
+        "model": "runs/temporal_jitter_seed0/model.pt"
+      },
+      {
+        "controller": "temporal",
+        "seed": 1,
+        "model": "runs/temporal_jitter_seed1/model.pt"
+      },
+      {
+        "controller": "temporal",
+        "seed": 2,
+        "model": "runs/temporal_jitter_seed2/model.pt"
+      },
+      {
+        "controller": "recurrent + prediction",
+        "seed": 0,
+        "model": "runs/recurrent_pred_jitter_seed0/model.pt"
+      },
+      {
+        "controller": "recurrent + prediction",
+        "seed": 1,
+        "model": "runs/recurrent_pred_jitter_seed1/model.pt"
+      },
+      {
+        "controller": "recurrent + prediction",
+        "seed": 2,
+        "model": "runs/recurrent_pred_jitter_seed2/model.pt"
+      },
+      {
+        "controller": "recurrent + prediction",
+        "seed": 3,
+        "model": "runs/recurrent_pred_jitter_seed3/model.pt"
+      },
+      {
+        "controller": "recurrent + prediction",
+        "seed": 4,
+        "model": "runs/recurrent_pred_jitter_seed4/model.pt"
+      },
+      {
+        "controller": "temporal + prediction",
+        "seed": 0,
+        "model": "runs/temporal_pred_jitter_seed0/model.pt"
+      },
+      {
+        "controller": "temporal + prediction",
+        "seed": 1,
+        "model": "runs/temporal_pred_jitter_seed1/model.pt"
+      },
+      {
+        "controller": "temporal + prediction",
+        "seed": 2,
+        "model": "runs/temporal_pred_jitter_seed2/model.pt"
+      },
+      {
+        "controller": "temporal + prediction",
+        "seed": 3,
+        "model": "runs/temporal_pred_jitter_seed3/model.pt"
+      },
+      {
+        "controller": "temporal + prediction",
+        "seed": 4,
+        "model": "runs/temporal_pred_jitter_seed4/model.pt"
+      }
+    ]
+  },
+  "delay_statistics": {
+    "burst_early": {
+      "mean_obs_age": 0.10210080092898359,
+      "max_obs_age": 0.2333224761495533,
+      "mean_capture_interval": 0.0603365680456554,
+      "discard_fraction": 0.42185209317478417
+    },
+    "burst_middle": {
+      "mean_obs_age": 0.10228720208993101,
+      "max_obs_age": 0.23332807681619183,
+      "mean_capture_interval": 0.06005429957806237,
+      "discard_fraction": 0.42019955202606396
+    },
+    "burst_late": {
+      "mean_obs_age": 0.09992583383604689,
+      "max_obs_age": 0.23330250428735433,
+      "mean_capture_interval": 0.05611869577869696,
+      "discard_fraction": 0.36257521603402254
+    }
+  },
+  "summary": {
+    "single_frame": {
+      "burst_early": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.12433333333333334,
+          "sd": 0.01184623709594458
+        },
+        "mean_return": {
+          "mean": -0.22016766823533332,
+          "sd": 0.04514211460464911
+        },
+        "mean_miss_distance": {
+          "mean": 0.5377601428299175,
+          "sd": 0.03419790118963417
+        }
+      },
+      "burst_middle": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.127,
+          "sd": 0.010816653826391978
+        },
+        "mean_return": {
+          "mean": -0.2083721204136636,
+          "sd": 0.027588627790065417
+        },
+        "mean_miss_distance": {
+          "mean": 0.5313801135128411,
+          "sd": 0.018820155269080558
+        }
+      },
+      "burst_late": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.11666666666666667,
+          "sd": 0.011239810200058245
+        },
+        "mean_return": {
+          "mean": -0.22407654813576844,
+          "sd": 0.028172862969773976
+        },
+        "mean_miss_distance": {
+          "mean": 0.5372510832556825,
+          "sd": 0.0182565243203144
+        }
+      }
+    },
+    "recurrent": {
+      "burst_early": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.21833333333333332,
+          "sd": 0.031005375877955963
+        },
+        "mean_return": {
+          "mean": -0.025224768944131955,
+          "sd": 0.09043163336959428
+        },
+        "mean_miss_distance": {
+          "mean": 0.44169541761279746,
+          "sd": 0.05342877216022137
+        }
+      },
+      "burst_middle": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.20133333333333334,
+          "sd": 0.02902297940138698
+        },
+        "mean_return": {
+          "mean": -0.06319072777860447,
+          "sd": 0.06907353548773074
+        },
+        "mean_miss_distance": {
+          "mean": 0.46258150368917533,
+          "sd": 0.0328229603613344
+        }
+      },
+      "burst_late": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.207,
+          "sd": 0.024331050121192885
+        },
+        "mean_return": {
+          "mean": -0.034404440074292456,
+          "sd": 0.07943092065457084
+        },
+        "mean_miss_distance": {
+          "mean": 0.442322020268604,
+          "sd": 0.04976566741351899
+        }
+      }
+    },
+    "temporal": {
+      "burst_early": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.24633333333333335,
+          "sd": 0.01301281419729542
+        },
+        "mean_return": {
+          "mean": 0.049496045391539,
+          "sd": 0.02475821424005791
+        },
+        "mean_miss_distance": {
+          "mean": 0.39896823706244333,
+          "sd": 0.010153360706989306
+        }
+      },
+      "burst_middle": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.23,
+          "sd": 0.03174901573277508
+        },
+        "mean_return": {
+          "mean": 0.013758840208628768,
+          "sd": 0.05194337816421919
+        },
+        "mean_miss_distance": {
+          "mean": 0.41715709853314675,
+          "sd": 0.01800506444540186
+        }
+      },
+      "burst_late": {
+        "n": 3,
+        "success_rate": {
+          "mean": 0.24,
+          "sd": 0.027874719729532718
+        },
+        "mean_return": {
+          "mean": 0.04813193673349259,
+          "sd": 0.04706156923165007
+        },
+        "mean_miss_distance": {
+          "mean": 0.397585715337728,
+          "sd": 0.017732351857179286
+        }
+      }
+    },
+    "recurrent + prediction": {
+      "burst_early": {
+        "n": 5,
+        "success_rate": {
+          "mean": 0.5602,
+          "sd": 0.09433822131034696
+        },
+        "mean_return": {
+          "mean": 0.5603049465604818,
+          "sd": 0.1538857617409245
+        },
+        "mean_miss_distance": {
+          "mean": 0.2537521782289762,
+          "sd": 0.04395792534916426
+        }
+      },
+      "burst_middle": {
+        "n": 5,
+        "success_rate": {
+          "mean": 0.5682,
+          "sd": 0.10360357136701417
+        },
+        "mean_return": {
+          "mean": 0.5726511188316051,
+          "sd": 0.17593232202462938
+        },
+        "mean_miss_distance": {
+          "mean": 0.2522435713176291,
+          "sd": 0.05307867191421627
+        }
+      },
+      "burst_late": {
+        "n": 5,
+        "success_rate": {
+          "mean": 0.6634,
+          "sd": 0.08083810982451282
+        },
+        "mean_return": {
+          "mean": 0.7297096104562492,
+          "sd": 0.13009085921201072
+        },
+        "mean_miss_distance": {
+          "mean": 0.20744790663540882,
+          "sd": 0.03379355801834339
+        }
+      }
+    },
+    "temporal + prediction": {
+      "burst_early": {
+        "n": 5,
+        "success_rate": {
+          "mean": 0.6952,
+          "sd": 0.09093239246825081
+        },
+        "mean_return": {
+          "mean": 0.7780154556819359,
+          "sd": 0.14512881852182463
+        },
+        "mean_miss_distance": {
+          "mean": 0.1982852338440524,
+          "sd": 0.03312964536711223
+        }
+      },
+      "burst_middle": {
+        "n": 5,
+        "success_rate": {
+          "mean": 0.7024,
+          "sd": 0.07091755776956792
+        },
+        "mean_return": {
+          "mean": 0.7891977239825859,
+          "sd": 0.1179615491758102
+        },
+        "mean_miss_distance": {
+          "mean": 0.19189117176952897,
+          "sd": 0.02734554923310464
+        }
+      },
+      "burst_late": {
+        "n": 5,
+        "success_rate": {
+          "mean": 0.802,
+          "sd": 0.08140945890988342
+        },
+        "mean_return": {
+          "mean": 0.9366635907384124,
+          "sd": 0.13790699191973885
+        },
+        "mean_miss_distance": {
+          "mean": 0.16321991255939236,
+          "sd": 0.030993755561848517
+        }
+      }
+    },
+    "stationary": {
+      "burst_early": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.053,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": -0.4141535619947384,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.7020454448295916,
+          "sd": null
+        }
+      },
+      "burst_middle": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.053,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": -0.4141535619947384,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.7020454448295916,
+          "sd": null
+        }
+      },
+      "burst_late": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.053,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": -0.4141535619947384,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.7020454448295916,
+          "sd": null
+        }
+      }
+    },
+    "chase": {
+      "burst_early": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.101,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": -0.28354071755842364,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.5590824743896483,
+          "sd": null
+        }
+      },
+      "burst_middle": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.1,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": -0.30150511846463696,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.5756611362751403,
+          "sd": null
+        }
+      },
+      "burst_late": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.087,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": -0.33918148261936404,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.6015039637033139,
+          "sd": null
+        }
+      }
+    },
+    "predictive": {
+      "burst_early": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.56,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": 0.5730044668022308,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.25316840949185776,
+          "sd": null
+        }
+      },
+      "burst_middle": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.572,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": 0.572152514351144,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.2640418967018975,
+          "sd": null
+        }
+      },
+      "burst_late": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.613,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": 0.6418579944325641,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.23933680015286235,
+          "sd": null
+        }
+      }
+    },
+    "oracle": {
+      "burst_early": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.974,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": 1.371881341042499,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.026179756640242965,
+          "sd": null
+        }
+      },
+      "burst_middle": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.974,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": 1.371881341042499,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.026179756640242965,
+          "sd": null
+        }
+      },
+      "burst_late": {
+        "n": 1,
+        "success_rate": {
+          "mean": 0.974,
+          "sd": null
+        },
+        "mean_return": {
+          "mean": 1.371881341042499,
+          "sd": null
+        },
+        "mean_miss_distance": {
+          "mean": 0.026179756640242965,
+          "sd": null
+        }
+      }
+    }
+  }
+}
