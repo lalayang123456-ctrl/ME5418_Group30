@@ -126,8 +126,8 @@ def make_delay_model(spec: Union[str, float, DelayModel], cfg: EnvConfig) -> Del
     """Build a delay model from a preset name, a number (fixed delay in seconds) or an instance.
 
     Presets: "none", "fixed" (the jitter mean, for a like-for-like comparison with "jitter"),
-    "jitter", "burst" (jitter plus one stall of maximum-delay frames at a random time) and "burst" with
-    3 start_fractions.
+    "jitter", "burst" (jitter plus one stall of maximum-delay frames at a random time), "burst" with
+    3 start_fractions and dispersed & clustered delays.
     """
     if isinstance(spec, DelayModel):
         return spec
