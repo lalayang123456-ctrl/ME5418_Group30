@@ -126,7 +126,8 @@ def make_delay_model(spec: Union[str, float, DelayModel], cfg: EnvConfig) -> Del
     """Build a delay model from a preset name, a number (fixed delay in seconds) or an instance.
 
     Presets: "none", "fixed" (the jitter mean, for a like-for-like comparison with "jitter"),
-    "jitter" and "burst" (jitter plus one stall of maximum-delay frames at a random time).
+    "jitter", "burst" (jitter plus one stall of maximum-delay frames at a random time) and "burst" with
+    3 start_fractions.
     """
     if isinstance(spec, DelayModel):
         return spec
@@ -141,6 +142,10 @@ def make_delay_model(spec: Union[str, float, DelayModel], cfg: EnvConfig) -> Del
     if spec == "burst":
         base = JitterDelay(cfg.jitter_mean, cfg.jitter_std, cfg.delay_max)
         return BurstDelay(base, start_fraction=None, n_frames=4, stall_delay=cfg.delay_max)
+    if spec in ("burst_early", "burst_middle", "burst_late"):
+        fractions = {"burst_early": 0.15, "burst_middle": 0.45, "burst_late": 0.75}
+        base = JitterDelay(cfg.jitter_mean, cfg.jitter_std, cfg.delay_max)
+        return BurstDelay(base, start_fraction=fractions[spec], n_frames=4, stall_delay=cfg.delay_max)
     raise ValueError(f"unknown delay model: {spec!r}")
 
 
