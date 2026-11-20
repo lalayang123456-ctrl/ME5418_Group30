@@ -14,8 +14,6 @@ frame was captured (capture interval and observation age) help it beyond memory 
 Their LaTeX sources are also included in `report/`. Experimental data and plots are in
 `report/figures/`, including the `additional_experiments/` subdirectory.
 
-**Demo video:** [ME5418_Group30_Demo_Recording.mov](ME5418_Group30_Demo_Recording.mov) (to be placed alongside this README in the project root).
-
 ## Setup
 
 Run these commands from the project root (the directory containing `environment.yml`).
@@ -404,7 +402,6 @@ outside the evaluated seeds and delay conditions.
 | `evaluate_delays.py` | Compare reference controllers and discovered trained checkpoints across delay conditions; export CSV, JSON, PNG and PDF |
 | `analyze_movement.py` | Measure movement onset and per-axis velocity reversals; export detailed/summary CSVs and PNGs |
 | `tune_predictive.py` | Grid search the predictive controller PD gains and minimum accepted frames |
-| `ME5418_Group30_Demo_Recording.mov` | Project demonstration video (add to project root before submission) |
 | `ME5418_Project_Demo.pptx` | Project demonstration presentation |
 | `me5418_project_demo.ipynb` | Project demonstration notebook |
 | `report/Gang_Yang_A0353152M_Final_Report.pdf` | Individual final project report included in this archive |
