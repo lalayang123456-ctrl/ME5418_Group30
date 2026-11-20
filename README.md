@@ -404,7 +404,9 @@ outside the evaluated seeds and delay conditions.
 | `tune_predictive.py` | Grid search the predictive controller PD gains and minimum accepted frames |
 | `ME5418_Project_Demo.pptx` | Project demonstration presentation |
 | `me5418_project_demo.ipynb` | Project demonstration notebook |
-| `report/Gang_Yang_A0353152M_Final_Report.pdf` | Individual final project report included in this archive |
+| `report/Gang_Yang_A0353152M_Final_Report.pdf` | Gang Yang's individual final report |
+| `report/Tapatahalli_Gurubasavaraj_Suhas_A0357165X_ME5418_Individual_Final_Report.pdf` | Suhas's individual final report |
+| `report/YUJIE_ZANG_A0355202R_Final_Report.pdf` | Yujie's individual final report |
 
 ## Using the environment from code
 
