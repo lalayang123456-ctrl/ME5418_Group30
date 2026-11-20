@@ -322,7 +322,7 @@ python evaluate_delays.py --episodes 1000 --workers 4 --out report/figures/new_d
 
 The default conditions are `none`, fixed delays of 0.05, 0.10, 0.15 and 0.20 seconds, `jitter`,
 and `burst`. Outputs are `<out>.csv`, `<out>.json`, `<out>.png` and `<out>.pdf`.
-The supplied main evaluation files are `report/figures/delay_sweep.*`.
+The supplied main evaluation files are `report/figures/delay_sweep.*`. The repository also includes `report/figures/final_test.*` (CSV, JSON, PNG and PDF), retained as a separate final-test output set. Consult the accompanying JSON for its recorded evaluation settings.
 
 ### Delay-pattern and stall-stage tests
 
@@ -351,6 +351,14 @@ It writes `<out>.csv`, `<out>_summary.csv`, `<out>_onset.png` and
 `<out>_reversals.png`. Existing `movement.*` and `movement_test.*` results are stored in
 `report/figures/additional_experiments/movement_tests/`. Velocity reversals are a specific
 sign-change metric, **not** a count of all steering corrections.
+
+### Auxiliary crossing-point prediction training
+
+The `--aux-coef` option in `train.py` sets the weight of an additional crossing-point prediction loss during PPO training. The default is `0` (disabled). A positive value enables auxiliary prediction for the `recurrent` or `temporal` variant; it is not supported for `single_frame`. The true crossing point is used as a training target, not as a policy observation at evaluation time.
+
+```bash
+python train.py --variant temporal --aux-coef 0.5 --out runs/new_temporal_pred
+```
 
 ### Saved trained checkpoints
 
@@ -394,6 +402,9 @@ outside the evaluated seeds and delay conditions.
 | `evaluate_delays.py` | Compare reference controllers and discovered trained checkpoints across delay conditions; export CSV, JSON, PNG and PDF |
 | `analyze_movement.py` | Measure movement onset and per-axis velocity reversals; export detailed/summary CSVs and PNGs |
 | `tune_predictive.py` | Grid search the predictive controller PD gains and minimum accepted frames |
+| `ME5418_Project_Demo.pptx` | Project demonstration presentation |
+| `me5418_project_demo.ipynb` | Project demonstration notebook |
+| `report/Gang_Yang_A0353152M_Final_Report.pdf` | Individual final project report included in this archive |
 
 ## Using the environment from code
 
