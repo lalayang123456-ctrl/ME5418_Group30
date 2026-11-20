@@ -405,3 +405,7 @@ env = gym.make("BallCatch-v0", delay="jitter")           # or: ball_catch.BallCa
 obs, info = env.reset(seed=0)
 obs, reward, terminated, truncated, info = env.step(env.action_space.sample())
 ```
+
+## AI tool usage declaration
+
+We used Anthropic’s Claude and OpenAI's ChatGPT to help write and debug code, analyze results, and draft and edit parts of the report and presentation. We are responsible for the content and quality of the submitted work.
